@@ -13,12 +13,8 @@ Hello, this is Mark.
 
 Hello, this is Jordan.
 
-<<<<<<< HEAD
 Hello, this is Jackie. 
-=======
+
 Hello, this is Griffin.
 
-Hello, this is Ethan
->>>>>>> 59cc43f6ad091bc8ae8213a781c258c0faaf2cc8
->>>>>>> 
-Hello, this is Jenna.
+Hello, this is Ethan.
