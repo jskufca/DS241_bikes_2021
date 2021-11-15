@@ -1,0 +1,6 @@
+---
+title: "Mark's rare title"
+output: html_notebook
+---
+
+In this file, I plan to add things for the future.
