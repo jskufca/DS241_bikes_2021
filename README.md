@@ -11,6 +11,8 @@ Hello, this is Sebastian.
 
 Hello, this is Mark.
 
+Hello, this is Jordan.
+
 <<<<<<< HEAD
 Hello, this is Jackie. 
 =======
