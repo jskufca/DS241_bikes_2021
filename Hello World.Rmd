@@ -1,0 +1,13 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: "Rodrigo Vecino"
+---
+
+## Hello world
+```{r}
+x <- sample(1:100, 10, replace=FALSE)
+y <- sample(1:100, 10, replace=FALSE)
+
+```
+
