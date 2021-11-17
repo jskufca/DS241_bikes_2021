@@ -13,7 +13,9 @@ Hello, this is Mark.
 
 Hello, this is Jackie.
 
+Hello, this is Jordan.
+
 Hello, this is Griffin.
 
-Hello, this is Ethan
+Hello, this is Ethan.
 
