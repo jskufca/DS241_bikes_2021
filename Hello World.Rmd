@@ -1,13 +1,52 @@
 ---
-title: "R Notebook"
+title: "COVID - 19"
 output: html_notebook
 author: "Rodrigo Vecino"
 ---
 
-## Hello world
+## Packages
 ```{r}
-x <- sample(1:100, 10, replace=FALSE)
-y <- sample(1:100, 10, replace=FALSE)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+```
+
+
+## Data
+Load data.
+```{r}
+data <- read.csv('U:/Data Science/DS241_bikes_2021/data.csv')
+
+data <- subset(covid, select = c(state, tot_cases, new_case, tot_death, new_death, created_at, submission_date))
+
+covid <- data %>%
+  filter(state =='DC') %>%
+  group_by(submission_date) %>%
+  arrange(submission_date, decreasing=TRUE) %>%
+  ungroup()
+
+# separate(covid$created_at, into = c("Date", "Time"), sep = " ", remove = TRUE, extra='drop')
 
 ```
 
+## Visualization
+```{r visualise, warning=FALSE}
+ggplot(data = covid,
+       mapping = aes(x = submission_date, 
+                     y = tot_death, )) +
+  # represent cumulative cases with lines
+  geom_line(size = 0.7, alpha = 0.8) +
+  # turn off legend
+  guides(color = FALSE) +
+  # use pretty colors
+  scale_color_viridis_d() +
+  # use minimal theme
+  theme_minimal() +
+  # customize labels
+  labs(
+    x = "Date",
+    y = "Deaths",
+    title = "Cumulative deaths from COVID-19 in DC"
+  )
+
+```
