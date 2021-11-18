@@ -1,0 +1,55 @@
+---
+title: "COVID_DC"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse) 
+library(janitor)
+library(ggplot2)
+library(lubridate)
+```
+
+```{r}
+df1 <- read_csv("DC_COVID-19_Total_Positive_Cases_by_Neighborhood.csv")%>%
+  clean_names()
+df1_loc <- read_csv("Neighborhood_Labels.csv")%>% 
+  clean_names()
+```
+```{r}
+df2 <- df1 %>%
+  separate(neighborhood,c("key","neighborhood"), ": ")
+```
+```{r}
+df2_loc <- df1_loc %>%
+  select("x_dir"=x,"y_dir"=y,label_name)%>%
+  mutate(neighborhood=toupper(label_name))%>%
+  mutate(neighborhood=case_when(
+  neighborhood == "16TH STREET HEIGHTS" ~ 	"16th ST HEIGHTS" ,
+  neighborhood == "CONGRESS HEIGHTS" ~ "CONGRESS HEIGHTS/SHIPLEY",     #missing DC medical center, georgetown east, national mall, south columbia heights, staduim armory, U st/pleasant, union station
+  neighborhood == "FOGGY BOTTOM" ~ "	FOGGY BOTTOM/GWU",
+  neighborhood == "FORT LINCOLN" ~ "FORT LINCOLN/GATEWAY",
+  neighborhood  == "GEORGE WASHINGTON UNIVERSITY" ~ "GWU",
+  neighborhood == "PALISADES" ~ "KENT/PALISADES",
+  neighborhood == "NAVY YARD" ~ "NAVAL STATION & AIR FORCE",
+  neighborhood == "HILLCREST" ~ "NAYLOR/HILLCREST",
+  neighborhood == "SOUTHWEST/WATERFRONT" ~ "SW/WATERFRONT",
+  TRUE~neighborhood))
+df3<- inner_join(df2,df2_loc,by = "neighborhood")%>%
+  select(date_reported, neighborhood, total_positives,y_dir,x_dir)
+df3$datereported<-ymd_hms(df3$date_reported, tz="UTC")
+```
+
+```{r}
+df4<- df3 %>%
+  filter(year(date_reported)== 2021,month(date_reported)== 9)%>%
+  group_by(neighborhood)%>%
+  summarize(CovidCases= sum(total_positives), x_dir, y_dir)
+
+ggplot(df4, aes(x = x_dir, y= y_dir,color = CovidCases)) + 
+  geom_point(size=4)+labs(title= "Total cases by neighborhood in DC", subtitle = "September 2021")+ xlab("latitude")+ylab("latitude")
+```
+
+
+
