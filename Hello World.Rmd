@@ -25,6 +25,7 @@ covid <- data %>%
   arrange(submission_date, decreasing=TRUE) %>%
   ungroup()
 
+#
 # separate(covid$created_at, into = c("Date", "Time"), sep = " ", remove = TRUE, extra='drop')
 
 ```
