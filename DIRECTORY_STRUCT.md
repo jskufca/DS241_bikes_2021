@@ -12,8 +12,6 @@ https://aosmith.rbind.io/2018/10/29/an-example-directory-structure/
 
 
 ## Our plan
-
-
 .
 └── project
 
