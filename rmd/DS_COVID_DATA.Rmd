@@ -4,6 +4,16 @@ output: html_document
 ---
 
 
+### Load Packages
+The following packages are used: 
+
+tidyverse: mutate data
+
+janitor: clean names
+
+ggplot2: create visualizations
+
+lubridate: manipulate dates
 ```{r}
 library(tidyverse) 
 library(janitor)
@@ -11,16 +21,31 @@ library(ggplot2)
 library(lubridate)
 ```
 
+
+### Load data
+The data is taken from Open DC. The first data set provides all COVID cases in DC by neighborhood. The link to the data set if found at https://opendata.dc.gov/datasets/62f6f28dbfc74ae489fa3dcda9e94744_28/about.
+
+The second data set provides longitude and latitude for DC Neighborhoods. The data is found at https://opendata.dc.gov/datasets/DCGIS::neighborhood-labels/about.
+
 ```{r}
-df1 <- read_csv("DC_COVID-19_Total_Positive_Cases_by_Neighborhood.csv")%>%
+setwd("~/R/DS_241_bikes_2021")
+df1 <- read_csv("Data/DC_COVID-19_Total_Positive_Cases_by_Neighborhood.csv")%>%
   clean_names()
-df1_loc <- read_csv("Neighborhood_Labels.csv")%>% 
+df1_loc <- read_csv("Data/Neighborhood_Labels.csv")%>% 
   clean_names()
 ```
+
+### clean data
+
+Isolates the neighborhood name from a neighborhood code.
 ```{r}
 df2 <- df1 %>%
   separate(neighborhood,c("key","neighborhood"), ": ")
 ```
+
+### Join Data
+
+Allows us to get coordinates and Covid cases in the same dataset
 ```{r}
 df2_loc <- df1_loc %>%
   select("x_dir"=x,"y_dir"=y,label_name)%>%
@@ -41,6 +66,8 @@ df3<- inner_join(df2,df2_loc,by = "neighborhood")%>%
 df3$datereported<-ymd_hms(df3$date_reported, tz="UTC")
 ```
 
+### Sample analysis
+Provides a visualization by mapping each neighbourhood, and colorizing plot accoding to covid cases 
 ```{r}
 df4<- df3 %>%
   filter(year(date_reported)== 2021,month(date_reported)== 9)%>%
