@@ -8,5 +8,13 @@ output: html_notebook
 library(tidyverse)
 library(janitor)
 library(lubridate)
+#library(dsbox)
 ```
+importing the data from csv file
+```{r}
+data <- read.csv("bikeshare_data.csv")
+View(data)
+```
+
+
 
