@@ -1,0 +1,20 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(readr)
+```
+
+
+```{r}
+url <- "https://s3.amazonaws.com/capitalbikeshare-data/202109-capitalbikeshare-tripdata.zip"
+
+download.file(url, destfile = "../data/raw/capitalshare.csv.zip", mode = "wb")
+unzip("../data/raw/capitalshare.csv.zip", exdir = "../data/raw")
+
+capitalshare <- read_csv("../data/raw/202109-capitalbikeshare-tripdata.csv")
+
+```
+
