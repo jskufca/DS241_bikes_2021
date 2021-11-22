@@ -34,3 +34,9 @@ This is Tori.
 
 To Do:
 Find Covid Rates by neighborhood for DC
+
+https://opendata.dc.gov/datasets/DCGIS::dc-covid-19-total-positive-cases-by-neighborhood/explore
+
+https://em.dcgis.dc.gov/dcgis/rest/services/COVID_19/OpenData_COVID19/FeatureServer/28/query?where=1%3D1&outFields=*&outSR=4326&f=json
+
+https://cran.r-project.org/web/packages/geojsonR/vignettes/the_geojsonR_package.html
