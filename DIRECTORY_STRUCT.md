@@ -8,7 +8,7 @@ https://martinctc.github.io/blog/rstudio-projects-and-working-directories-a-begi
 
 https://www.r-bloggers.com/2018/08/structuring-r-projects/
 
-https://aosmith.rbind.io/2018/10/29/an-example-directory-structure/
+https://aosmith.rbind.io/2018/10/29/an-example-directory-structure/    
 
 
 ## Our plan
