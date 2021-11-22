@@ -1,0 +1,12 @@
+---
+title: "jacksons_experiments"
+author: "Jackson"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+```
+
