@@ -1,0 +1,14 @@
+---
+title: "Bike Analysis"
+author: "Shreejit Poudyal"
+date: "11/17/2021"
+output: html_document
+---
+
+### Loading Packages
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readr)
+library(lubridate)
+```
