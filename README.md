@@ -30,3 +30,7 @@ Hello, this is Tarak
 This is Kyle
 
 This is Tori.
+
+
+To Do:
+Find Covid Rates by neighborhood for DC
