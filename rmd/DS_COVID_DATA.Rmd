@@ -13,12 +13,19 @@ janitor: clean names
 
 ggplot2: create visualizations
 
+tigris: graph maps 
+
+sf: load kml files
+
 lubridate: manipulate dates
+
 ```{r}
 library(tidyverse) 
 library(janitor)
 library(ggplot2)
 library(lubridate)
+library(tigris)  
+library(sf)
 ```
 
 
@@ -48,12 +55,12 @@ df2 <- df1 %>%
 Allows us to get coordinates and Covid cases in the same dataset
 ```{r}
 df2_loc <- df1_loc %>%
-  select("x_dir"=x,"y_dir"=y,label_name)%>%
+  dplyr::select("x_dir"=x,"y_dir"=y,label_name)%>%
   mutate(neighborhood=toupper(label_name))%>%
   mutate(neighborhood=case_when(
   neighborhood == "16TH STREET HEIGHTS" ~ 	"16th ST HEIGHTS" ,
-  neighborhood == "CONGRESS HEIGHTS" ~ "CONGRESS HEIGHTS/SHIPLEY",     #missing DC medical center, georgetown east, national mall, south columbia heights, staduim armory, U st/pleasant, union station
-  neighborhood == "FOGGY BOTTOM" ~ "	FOGGY BOTTOM/GWU",
+  neighborhood == "CONGRESS HEIGHTS" ~ "CONGRESS HEIGHTS/SHIPLEY",     #missing DC medical center, georgetown east, national mall, south columbia heights, stadium armory, U st/pleasant, union station
+  neighborhood == "FOGGY BOTTOM" ~ "FOGGY BOTTOM/GWU",
   neighborhood == "FORT LINCOLN" ~ "FORT LINCOLN/GATEWAY",
   neighborhood  == "GEORGE WASHINGTON UNIVERSITY" ~ "GWU",
   neighborhood == "PALISADES" ~ "KENT/PALISADES",
@@ -62,7 +69,7 @@ df2_loc <- df1_loc %>%
   neighborhood == "SOUTHWEST/WATERFRONT" ~ "SW/WATERFRONT",
   TRUE~neighborhood))
 df3<- inner_join(df2,df2_loc,by = "neighborhood")%>%
-  select(date_reported, neighborhood, total_positives,y_dir,x_dir)
+  dplyr::select(date_reported, neighborhood, total_positives,y_dir,x_dir)
 df3$datereported<-ymd_hms(df3$date_reported, tz="UTC")
 ```
 
@@ -73,10 +80,46 @@ df4<- df3 %>%
   filter(year(date_reported)== 2021,month(date_reported)== 9)%>%
   group_by(neighborhood)%>%
   summarize(CovidCases= sum(total_positives), x_dir, y_dir)
-
 ggplot(df4, aes(x = x_dir, y= y_dir,color = CovidCases)) + 
   geom_point(size=4)+labs(title= "Total cases by neighborhood in DC", subtitle = "September 2021")+ xlab("latitude")+ylab("latitude")
 ```
+applying a border on DC, we get:
+
+```{r}
+us_states <- county_subdivisions("DC","District of Columbia")
+
+ggplot(us_states)+geom_sf()+geom_point(data= df4,aes(x = x_dir, y= y_dir, color= CovidCases))
+
+```
 
 
+Using the GIS data for DC neighborhoods found at https://www.google.com/maps/d/u/0/viewer?mid=1z_3yTY-G8hZZ3z5qh3tM9dBh5ps&ll=38.90259760569627%2C-77.01308710000002&z=10, we then plotted the neighborhoods and the points
 
+```{r}
+cgg <- st_read("Data/Washington_DC_neighborhoods.kml")
+cgg1 <- cgg %>%
+  mutate(neighborhood=toupper(Description))
+cgg2 <- cgg1%>%
+    mutate(neighborhood=case_when(
+  neighborhood=="ANACOSTIA" ~ "HISTORIC ANACOSTIA",
+  neighborhood=="CONGRESS HEIGHTS" ~ "CONGRESS HEIGHTS/SHIPLEY",
+  neighborhood=="FORT LINCOLN" ~ "FORT LINCOLN/GATEWAY",
+  neighborhood=="KENT" ~ "KENT/PALISADES",
+  neighborhood=="Logan Circle" ~ "LOGAN CIRCLE/SHAW",
+  neighborhood=="NAVY YARD" ~ "NAVAL STATION & AIR FORCE",
+  neighborhood=="NAYLOR GARDENS" ~ "NAYLOR/HILLCREST",
+    TRUE ~ neighborhood
+    ))%>%
+  filter (neighborhood %in% c(df4$neighborhood))
+ggplot(us_states)+geom_sf()+geom_sf(data = cgg2)+geom_point(data= df4,aes(x = x_dir, y= y_dir, color= CovidCases))
+```
+We then joined the data together to get a plot where insead of points, we colorize the area of the graph.
+
+```{r}
+cgg3<- inner_join(df4,cgg2,by = "neighborhood")%>%
+  dplyr::select(neighborhood,geometry,CovidCases)
+ggplot(data = cgg3$geometry, )+geom_sf(data=us_states$geometry)+geom_sf(aes(fill=cgg3$CovidCases))
+
+```
+
+As you can see currently, not all of DC is filled in. When making the joins, we ended up dropping some of the points as they were not in all of our data sets. Further research and adding locations by hand will be needed to make this data more complete.
