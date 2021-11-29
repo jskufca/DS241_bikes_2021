@@ -13,6 +13,9 @@ library(tidyverse)
 library(dsbox) 
 library(lubridate)
 library(janitor)
+library(readr)
+library(sf)
+library(tmap)
 ```
 
 
@@ -44,6 +47,12 @@ Here the goal is to make a plot of a subset of the datapoints from the bike shar
 
 Our subset will be the locations of pick-ups and drop-offs for Saturday September 4, 2021
 
+```{r}
+df1a <-  unzip(202108-capitalbikeshare-tripdata.zip) %>%
+  read_csv("https://s3.amazonaws.com/capitalbikeshare-data/index.html.csv") %>% clean_names
+```
+
+
 ```{r download_data}
 df1 <- read_csv("U:/Data Science 241/202109-capitalbikeshare-tripdata.csv") %>% clean_names
 ```
@@ -73,4 +82,14 @@ ggplot(df1a, mapping = aes(x = end_lat, y = end_lng)) +
 ```
 It would be beneficial if this plot were overlaid over some map of the city. Right now the points do not mean much.
 
+##SF File Work
+
+```{r}
+sf_neighborhoods_df<- sf::read_sf("DC_Health_Planning_Neighborhoods")
+View(sf_neighborhoods_df)
+```
+
+```{r}
+plot(sf_neighborhoods_df) 
+```
 
