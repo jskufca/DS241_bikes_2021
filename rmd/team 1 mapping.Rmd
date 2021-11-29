@@ -85,11 +85,10 @@ It would be beneficial if this plot were overlaid over some map of the city. Rig
 ##SF File Work
 
 ```{r}
-sf_neighborhoods_df<- sf::read_sf("DC_Health_Planning_Neighborhoods")
-View(sf_neighborhoods_df)
+sf_neighborhoods_df <- sf::read_sf("U:/Data Science 241/DS241_bikes_2021/DC_Health_Planning_Neighborhoods")
+ View(sf_neighborhoods_df)
 ```
 
 ```{r}
 plot(sf_neighborhoods_df) 
 ```
-
