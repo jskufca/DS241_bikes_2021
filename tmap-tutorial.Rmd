@@ -3,6 +3,12 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html
+
+Another one: https://rpubs.com/luigicesarini/tutorial_packages
+
+Another: https://keen-swartz-3146c4.netlify.app/intro.html
+
 ```{r}
 library(tmap)
 ```
@@ -43,7 +49,7 @@ tm_legend(show = FALSE)
 
 Facets
 
-1.  assigning multiple variable names to one aesthetic
+1. assigning multiple variable names to one aesthetic
 
 ```{r}
 tmap_mode("view")
