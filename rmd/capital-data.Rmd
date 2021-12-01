@@ -5,6 +5,7 @@ output: html_notebook
 
 ```{r}
 library(readr)
+library(sf)
 ```
 
 
@@ -14,7 +15,12 @@ url <- "https://s3.amazonaws.com/capitalbikeshare-data/202109-capitalbikeshare-t
 download.file(url, destfile = "../data/raw/capitalshare.csv.zip", mode = "wb")
 unzip("../data/raw/capitalshare.csv.zip", exdir = "../data/raw")
 
-capitalshare <- read_csv("../data/raw/202109-capitalbikeshare-tripdata.csv")
+capitalshare <- read_csv("../data/raw/202109-capitalbikeshare-tripdata.csv", show_col_types = FALSE)
+
+stations <- capitalshare %>%
+  select(start_station_name, start_lat, start_lng) %>%
+  distinct(start_station_name, .keep_all=TRUE)
+
 
 ```
 
