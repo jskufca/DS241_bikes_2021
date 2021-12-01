@@ -1,0 +1,62 @@
+---
+title: "dc_covid"
+author: "Jackie Budka"
+date: "11/29/2021"
+output: html_notebook
+---
+
+
+
+```{r load packages}
+library(tidyverse)
+library(tidymodels)
+library(dsbox)
+library(httr)
+library(jsonlite)
+library(lubridate)
+library(sf)
+library(tmap)
+library(ggplot2)
+```
+
+```{r}
+# url <- "https://opendata.arcgis.com"
+# path <- "datasets/62f6f28dbfc74ae489fa3dcda9e94744_28.geojson"
+# raw_data <- GET(url,path)
+```
+```{r}
+neighborhoods_shape <- sf::read_sf("DC_Health_Planning_Neighborhoods") %>%
+plot() 
+```
+
+
+```{r}
+st_covered_by()
+```
+
+```{r download_data}
+df1 <- read_csv("202109-capitalbikeshare-tripdata.csv") %>% clean_names()
+```
+
+Here We want to get the data filtered to just Sep 4
+```{r manipulate_data}
+df1a = df1 %>% 
+  select(rideable_type, start = started_at, end = ended_at, start_station_name:end_lng) %>%
+  pivot_longer(cols =  start:end,  names_to = "type", values_to = "time")%>%
+  arrange(time) %>%
+  mutate(inc = case_when(
+    type == "start" ~ 1,
+    type == "end" ~ -1
+  ), riders = cumsum(inc)) %>%
+  mutate(day_of_year = yday(time)) %>%
+  mutate(day_since_sep1 = day_of_year-243) %>%
+  filter(day_since_sep1 == 4)
+```
+
+Here is the visualization
+```{r visualization}
+ggplot(df1a, mapping = aes(x = start_lat, y = start_lng)) +
+  geom_point() #+ geom_sf(aes(neighborhoods_shape))
+ggplot(df1a, mapping = aes(x = end_lat, y = end_lng)) +
+  geom_point()
+```
