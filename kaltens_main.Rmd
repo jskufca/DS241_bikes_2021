@@ -6,10 +6,12 @@ output: html_notebook
 ```{r}
 library(tidycensus)
 library(tidyverse)
+library(sf)
+library(janitor)
 
 options(tigris_use_cache = TRUE)
 
-#census_api_key("72ced2515c5a0d9cc250f2fd9772b7cc36aad262", install = TRUE)
+census_api_key("72ced2515c5a0d9cc250f2fd9772b7cc36aad262", overwrite = TRUE)
 ```
 
 Required Census codes for demographic variables. Selection is based on most popular demographic values:
@@ -33,7 +35,8 @@ v19 <- load_variables(2019, "acs5", cache = TRUE) %>%
 
 ```{r}
 df_age <- get_acs(geography = "tract", variables = "B01002_001",
-state = "DC", geometry = TRUE)
+state = "DC", geometry = TRUE) %>% clean_names() %>%
+  mutate(location = st_sf(geometry))
 plot(df_age["estimate"])
 ```
 
@@ -41,7 +44,7 @@ plot(df_age["estimate"])
 
 ```{r}
 df_income <- get_acs(geography = "tract", variables = "B19013_001",
-state = "DC", geometry = TRUE)
+state = "DC", geometry = TRUE) %>% clean_names()
 plot(df_income["estimate"])
 
 ```
@@ -50,6 +53,6 @@ plot(df_income["estimate"])
 
 ```{r}
 df_race <- get_acs(geography = "tract", variables = "B02001_001",
-state = "DC", geometry = TRUE)
+state = "DC", geometry = TRUE) %>% clean_names()
 plot(df_race["estimate"])
 ```
