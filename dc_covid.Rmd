@@ -17,6 +17,7 @@ library(lubridate)
 library(sf)
 library(tmap)
 library(ggplot2)
+library(janitor)
 ```
 
 ```{r}
@@ -24,18 +25,16 @@ library(ggplot2)
 # path <- "datasets/62f6f28dbfc74ae489fa3dcda9e94744_28.geojson"
 # raw_data <- GET(url,path)
 ```
+
 ```{r}
 neighborhoods_shape <- sf::read_sf("DC_Health_Planning_Neighborhoods") %>%
 plot() 
 ```
 
 
-```{r}
-st_covered_by()
-```
 
 ```{r download_data}
-df1 <- read_csv("202109-capitalbikeshare-tripdata.csv") %>% clean_names()
+df1 <- read_csv("data/202109-capitalbikeshare-tripdata.csv") %>% clean_names()
 ```
 
 Here We want to get the data filtered to just Sep 4
@@ -60,3 +59,14 @@ ggplot(df1a, mapping = aes(x = start_lat, y = start_lng)) +
 ggplot(df1a, mapping = aes(x = end_lat, y = end_lng)) +
   geom_point()
 ```
+
+
+```{r}
+df1b <- df1a %>%
+  select(start_lat,start_lng) %>%
+st_as_sf(coords = c("start_lng", "start_lat"), crs = 4326)
+# neighborhoods_shape_st <- st_centroid(st_geometry(neighborhoods_shape))
+# st_covered_by(neighborhoods_shape,df1b_st)
+```
+
+
