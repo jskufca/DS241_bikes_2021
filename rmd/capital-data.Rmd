@@ -62,15 +62,15 @@ tmap_mode("view")
 tm_shape(neigh2) +tm_polygons("total_positives",alpha=.5)
 ```
 
+
 ```{r}
-census_api_key("e811d2bef60d1bcf657f8c0222687e80e03335da")
+#census_api_key("e811d2bef60d1bcf657f8c0222687e80e03335da", install = TRUE)
 #what variables
 v20 = load_variables(2018,"acs5")
 # median_family_income="	B06011_001" 
 # all "B00001_001"	
 #black "B02009_001"
 ```
-
 
 Get some data:
 
@@ -88,7 +88,7 @@ plot(df_cencus)
 ```
 It's in long format.  Let's make it wide.
 ```{r}
-df_cens=df_cencus %>% select(-moe) %>% spread(variable,estimate) 
+df_cens=df_cencus %>% select(-moe) %>% spread(variable,estimate) #%>% clean_names()
 tm_shape(df_cens) +tm_polygons("median_inc",alpha=.5)
 ```
 
@@ -99,9 +99,8 @@ tm_shape(df_cens) +tm_polygons("median_inc",alpha=.5)
 ```
 
 
-
 ```{r}
-df_j=st_join(df_cens,neigh2,prepared=FALSE)
+#df_j=st_join(df_cens,neigh2,prepared=FALSE)
 ```
 
 ```{r}
@@ -129,7 +128,7 @@ plot(df1)
 ```
 
 ```{r}
-df2=left_join(neigh2,df1)
+#df2=left_join(neigh2,df1)
 df2=left_join(neigh2,df1 %>% st_set_geometry(NULL))
 ```
 

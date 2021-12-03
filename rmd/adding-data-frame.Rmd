@@ -1,0 +1,76 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(readr)
+library(sf)
+library(tmap)
+library(tidyverse)
+library(dplyr)
+library(here)
+library(janitor)
+library(lubridate)
+library(tidycensus)
+library(ggmap)
+```
+
+
+```{r}
+url <- "https://s3.amazonaws.com/capitalbikeshare-data/202109-capitalbikeshare-tripdata.zip"
+
+download.file(url, destfile = "../data/raw/capitalshare.csv.zip", mode = "wb")
+unzip("../data/raw/capitalshare.csv.zip", exdir = "../data/raw")
+```
+
+```{r}
+capitalshare <- read_csv("../data/raw/202109-capitalbikeshare-tripdata.csv", show_col_types = FALSE)
+
+stations <- capitalshare %>%
+  select(start_station_name, start_lat, start_lng) %>%
+  distinct(start_station_name, .keep_all=TRUE)
+
+neighborhoods <- sf::read_sf("../data/raw/dc-neighborhoods")
+#ggplot(neighborhoods)+geom_sf()
+#plot(neighborhoods)
+```
+
+Read in geojson file from the dc-health-planning-neighborhoods open dc page.
+
+```{r}
+neigh = st_read(here("data", "raw", "dc_neigh.geojson")) %>% clean_names()
+```
+
+```{r}
+df_c=readxl::read_excel(here("data","raw","neigh_cases.xlsx"), col_types = c("date", "text", "numeric")) %>% clean_names()
+```
+
+```{r}
+df_cases=df_c %>%
+  #filter(as_date(date) == "2021-11-17") %>% 
+  separate(neighborhood,into=c("code","name"),sep = ":") %>%
+  mutate(code=case_when(
+    code=="N35" ~"N0",
+    TRUE ~ code
+  ))
+```
+
+might use https://www.jessesadler.com/post/geocoding-with-r/
+
+```{r}
+df_trans <- df_cases %>% st_transform(4326)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
