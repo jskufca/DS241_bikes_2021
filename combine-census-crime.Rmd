@@ -1,0 +1,35 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(sf)
+library(tidycensus)
+```
+
+
+Load shapefile
+
+```{r}
+shp_file <- st_read(
+  "crime_incidents_in_2021/Crime_Incidents_in_2021.shp")
+```
+
+Get census variables for 2018.
+
+```{r}
+census_api_key("02f18dbf4723c0e2294a9e28897da52b6751a603")
+v20 = load_variables(2018, 'acs5')
+```
+Get census data for 2018.
+
+```{r}
+df_census = get_acs(geography="tract",
+                    variables=c("median_inc" = "B06011_001",
+                                "pop" = "B01001_001",
+                                "pop_black" = "B02009_001"),
+                    state="DC", geometry=TRUE, year=2018)
+```
+
