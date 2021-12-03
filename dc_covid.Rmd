@@ -27,7 +27,7 @@ library(janitor)
 ```
 
 ```{r}
-neighborhoods_shape <- sf::read_sf("DC_Health_Planning_Neighborhoods") %>%
+neighborhoods_shape <- st_read("DC_Health_Planning_Neighborhoods") %>%
 plot() 
 ```
 
@@ -65,8 +65,8 @@ ggplot(df1a, mapping = aes(x = end_lat, y = end_lng)) +
 df1b <- df1a %>%
   select(start_lat,start_lng) %>%
 st_as_sf(coords = c("start_lng", "start_lat"), crs = 4326)
-# neighborhoods_shape_st <- st_centroid(st_geometry(neighborhoods_shape))
-# st_covered_by(neighborhoods_shape,df1b_st)
+
+# left_join(neighborhoods_shape,df1b,by="fruit")
 ```
 
 
