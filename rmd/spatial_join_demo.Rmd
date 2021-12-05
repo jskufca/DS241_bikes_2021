@@ -165,7 +165,11 @@ tm_shape(df_cens) +tm_polygons("median_inc",alpha=.5)
 
 
 ```{r}
+<<<<<<< HEAD
 df_j=st_join(df_cens,neigh2)
+=======
+df_j=st_join(df_cens,neigh2,prepared=FALSE)
+>>>>>>> aaf01be5cf721819dd2df615aef7a1999bcec0c2
 ```
 
 ```{r}
@@ -178,7 +182,11 @@ df_j=st_join(df_cens_adj,neigh2,largest=TRUE)
 Other order?:
 
 ```{r}
+<<<<<<< HEAD
 #df_j_rev = st_join(neigh2,df_cens_adj,largest=TRUE)
+=======
+df_j_rev = st_join(neigh2,df_cens_adj,largest=TRUE)
+>>>>>>> aaf01be5cf721819dd2df615aef7a1999bcec0c2
 ```
 
 Since we want the geometry for the NEIGHBORHOODS, we need a different work a little harder:
