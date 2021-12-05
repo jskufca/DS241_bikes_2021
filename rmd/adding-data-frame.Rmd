@@ -85,20 +85,9 @@ riders_sf <- st_as_sf(riders_day_loc, coords = c("start_lng", "start_lat"), crs 
 ```
 
 ```{r}
-df <- st_intersects(neigh2, riders_sf)
-int <- df[[1]]
+stations_sf <- st_as_sf(stations, coords = c("start_lng", "start_lat"), crs = 4326)
+stations_neigh <- st_join(neigh2, stations_sf, join = st_contains)
 ```
-
-
-
-
-
-might use https://www.jessesadler.com/post/geocoding-with-r/
-
-```{r}
-df_trans <- df_cases %>% st_transform(4326)
-```
-
 
 
 
