@@ -20,20 +20,19 @@ library(ggmap)
 ```{r}
 url <- "https://s3.amazonaws.com/capitalbikeshare-data/202109-capitalbikeshare-tripdata.zip"
 
-download.file(url, destfile = "../data/raw/capitalshare.csv.zip", mode = "wb")
-unzip("../data/raw/capitalshare.csv.zip", exdir = "../data/raw")
+download.file(url, destfile = here("data", "raw", "capitalshare.csv.zip"), mode = "wb")
+unzip(here("data", "raw", "capitalshare.csv.zip"), exdir = here("data", "raw"))
 ```
 
 ```{r}
-capitalshare <- read_csv("../data/raw/202109-capitalbikeshare-tripdata.csv", show_col_types = FALSE)
+capitalshare <- read_csv(here("data", "raw", "202109-capitalbikeshare-tripdata.csv"), show_col_types = FALSE)
 
 stations <- capitalshare %>%
   select(start_station_name, start_lat, start_lng) %>%
   distinct(start_station_name, .keep_all=TRUE)
 
-neighborhoods <- sf::read_sf("../data/raw/dc-neighborhoods")
-#ggplot(neighborhoods)+geom_sf()
-#plot(neighborhoods)
+neighborhoods <- sf::read_sf(here("data", "raw", "dc-neighborhoods"))
+
 ```
 
 Read in geojson file from the dc-health-planning-neighborhoods open dc page.
@@ -48,7 +47,7 @@ df_c=readxl::read_excel(here("data","raw","neigh_cases.xlsx"), col_types = c("da
 
 ```{r}
 df_cases=df_c %>%
-  #filter(as_date(date) == "2021-11-17") %>% 
+  filter(as_date(date) == "2021-11-17") %>% 
   separate(neighborhood,into=c("code","name"),sep = ":") %>%
   mutate(code=case_when(
     code=="N35" ~"N0",
@@ -65,7 +64,6 @@ Determine the number of riders that started on each day per station.
 
 ```{r}
 riders_day <- capitalshare %>%
-  #select(started_at, ended_at, start_station_name, end_station_name, start_lat, start_lng, end_lat, end_lng) %>%
   mutate(start_date = date(started_at), end_date = date(ended_at)) %>%
   group_by(start_date, start_station_name) %>%
   summarise(riders = n()) %>%
@@ -85,10 +83,16 @@ riders_sf <- st_as_sf(riders_day_loc, coords = c("start_lng", "start_lat"), crs 
 ```
 
 ```{r}
-stations_sf <- st_as_sf(stations, coords = c("start_lng", "start_lat"), crs = 4326)
-stations_neigh <- st_join(neigh2, stations_sf, join = st_contains)
+stations_neigh <- st_join(riders_sf, neigh2, join = st_intersects)
 ```
 
+Remove some unnecessary columns.
+
+```{r}
+df <- stations_neigh %>%
+  select(-c(name.x, name.y, shapearea, shapelen, objectid, date)) %>%
+  rename(neigh = dc_hpn_name)
+```
 
 
 

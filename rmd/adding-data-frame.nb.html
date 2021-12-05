@@ -233,26 +233,25 @@ library(ggmap)</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudXJsIDwtIFwiaHR0cHM6Ly9zMy5hbWF6b25hd3MuY29tL2NhcGl0YWxiaWtlc2hhcmUtZGF0YS8yMDIxMDktY2FwaXRhbGJpa2VzaGFyZS10cmlwZGF0YS56aXBcIlxuXG5kb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSBcIi4uL2RhdGEvcmF3L2NhcGl0YWxzaGFyZS5jc3YuemlwXCIsIG1vZGUgPSBcIndiXCIpXG51bnppcChcIi4uL2RhdGEvcmF3L2NhcGl0YWxzaGFyZS5jc3YuemlwXCIsIGV4ZGlyID0gXCIuLi9kYXRhL3Jhd1wiKVxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudXJsIDwtIFwiaHR0cHM6Ly9zMy5hbWF6b25hd3MuY29tL2NhcGl0YWxiaWtlc2hhcmUtZGF0YS8yMDIxMDktY2FwaXRhbGJpa2VzaGFyZS10cmlwZGF0YS56aXBcIlxuXG5kb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSBoZXJlKFwiZGF0YVwiLCBcInJhd1wiLCBcImNhcGl0YWxzaGFyZS5jc3YuemlwXCIpLCBtb2RlID0gXCJ3YlwiKVxudW56aXAoaGVyZShcImRhdGFcIiwgXCJyYXdcIiwgXCJjYXBpdGFsc2hhcmUuY3N2LnppcFwiKSwgZXhkaXIgPSBoZXJlKFwiZGF0YVwiLCBcInJhd1wiKSlcbmBgYCJ9 -->
 <pre class="r"><code>url &lt;- &quot;https://s3.amazonaws.com/capitalbikeshare-data/202109-capitalbikeshare-tripdata.zip&quot;
 
-download.file(url, destfile = &quot;../data/raw/capitalshare.csv.zip&quot;, mode = &quot;wb&quot;)
-unzip(&quot;../data/raw/capitalshare.csv.zip&quot;, exdir = &quot;../data/raw&quot;)</code></pre>
+download.file(url, destfile = here(&quot;data&quot;, &quot;raw&quot;, &quot;capitalshare.csv.zip&quot;), mode = &quot;wb&quot;)
+unzip(here(&quot;data&quot;, &quot;raw&quot;, &quot;capitalshare.csv.zip&quot;), exdir = here(&quot;data&quot;, &quot;raw&quot;))</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2FwaXRhbHNoYXJlIDwtIHJlYWRfY3N2KFwiLi4vZGF0YS9yYXcvMjAyMTA5LWNhcGl0YWxiaWtlc2hhcmUtdHJpcGRhdGEuY3N2XCIsIHNob3dfY29sX3R5cGVzID0gRkFMU0UpXG5cbnN0YXRpb25zIDwtIGNhcGl0YWxzaGFyZSAlPiVcbiAgc2VsZWN0KHN0YXJ0X3N0YXRpb25fbmFtZSwgc3RhcnRfbGF0LCBzdGFydF9sbmcpICU+JVxuICBkaXN0aW5jdChzdGFydF9zdGF0aW9uX25hbWUsIC5rZWVwX2FsbD1UUlVFKVxuXG5uZWlnaGJvcmhvb2RzIDwtIHNmOjpyZWFkX3NmKFwiLi4vZGF0YS9yYXcvZGMtbmVpZ2hib3Job29kc1wiKVxuI2dncGxvdChuZWlnaGJvcmhvb2RzKStnZW9tX3NmKClcbiNwbG90KG5laWdoYm9yaG9vZHMpXG5gYGAifQ== -->
-<pre class="r"><code>capitalshare &lt;- read_csv(&quot;../data/raw/202109-capitalbikeshare-tripdata.csv&quot;, show_col_types = FALSE)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2FwaXRhbHNoYXJlIDwtIHJlYWRfY3N2KGhlcmUoXCJkYXRhXCIsIFwicmF3XCIsIFwiMjAyMTA5LWNhcGl0YWxiaWtlc2hhcmUtdHJpcGRhdGEuY3N2XCIpLCBzaG93X2NvbF90eXBlcyA9IEZBTFNFKVxuXG5zdGF0aW9ucyA8LSBjYXBpdGFsc2hhcmUgJT4lXG4gIHNlbGVjdChzdGFydF9zdGF0aW9uX25hbWUsIHN0YXJ0X2xhdCwgc3RhcnRfbG5nKSAlPiVcbiAgZGlzdGluY3Qoc3RhcnRfc3RhdGlvbl9uYW1lLCAua2VlcF9hbGw9VFJVRSlcblxubmVpZ2hib3Job29kcyA8LSBzZjo6cmVhZF9zZihoZXJlKFwiZGF0YVwiLCBcInJhd1wiLCBcImRjLW5laWdoYm9yaG9vZHNcIikpXG5cbmBgYCJ9 -->
+<pre class="r"><code>capitalshare &lt;- read_csv(here(&quot;data&quot;, &quot;raw&quot;, &quot;202109-capitalbikeshare-tripdata.csv&quot;), show_col_types = FALSE)
 
 stations &lt;- capitalshare %&gt;%
   select(start_station_name, start_lat, start_lng) %&gt;%
   distinct(start_station_name, .keep_all=TRUE)
 
-neighborhoods &lt;- sf::read_sf(&quot;../data/raw/dc-neighborhoods&quot;)
-#ggplot(neighborhoods)+geom_sf()
-#plot(neighborhoods)</code></pre>
+neighborhoods &lt;- sf::read_sf(here(&quot;data&quot;, &quot;raw&quot;, &quot;dc-neighborhoods&quot;))
+</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -262,6 +261,14 @@ neighborhoods &lt;- sf::read_sf(&quot;../data/raw/dc-neighborhoods&quot;)
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubmVpZ2ggPSBzdF9yZWFkKGhlcmUoXCJkYXRhXCIsIFwicmF3XCIsIFwiZGNfbmVpZ2guZ2VvanNvblwiKSkgJT4lIGNsZWFuX25hbWVzKClcbmBgYCJ9 -->
 <pre class="r"><code>neigh = st_read(here(&quot;data&quot;, &quot;raw&quot;, &quot;dc_neigh.geojson&quot;)) %&gt;% clean_names()</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUmVhZGluZyBsYXllciBgRENfSGVhbHRoX1BsYW5uaW5nX05laWdoYm9yaG9vZHMnIGZyb20gZGF0YSBzb3VyY2UgYC9ob21lL2t5bGUvRFMyNDFfYmlrZXNfMjAyMS9kYXRhL3Jhdy9kY19uZWlnaC5nZW9qc29uJyB1c2luZyBkcml2ZXIgYEdlb0pTT04nXG5TaW1wbGUgZmVhdHVyZSBjb2xsZWN0aW9uIHdpdGggNTEgZmVhdHVyZXMgYW5kIDggZmllbGRzXG5HZW9tZXRyeSB0eXBlOiBQT0xZR09OXG5EaW1lbnNpb246ICAgICBYWVxuQm91bmRpbmcgYm94OiAgeG1pbjogLTc3LjExOTc2IHltaW46IDM4Ljc5MTY1IHhtYXg6IC03Ni45MDk0IHltYXg6IDM4Ljk5NTU2XG5HZW9kZXRpYyBDUlM6ICBXR1MgODRcbiJ9 -->
+<pre><code>Reading layer `DC_Health_Planning_Neighborhoods&#39; from data source `/home/kyle/DS241_bikes_2021/data/raw/dc_neigh.geojson&#39; using driver `GeoJSON&#39;
+Simple feature collection with 51 features and 8 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -77.11976 ymin: 38.79165 xmax: -76.9094 ymax: 38.99556
+Geodetic CRS:  WGS 84</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -273,9 +280,9 @@ neighborhoods &lt;- sf::read_sf(&quot;../data/raw/dc-neighborhoods&quot;)
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfY2FzZXM9ZGZfYyAlPiVcbiAgI2ZpbHRlcihhc19kYXRlKGRhdGUpID09IFwiMjAyMS0xMS0xN1wiKSAlPiUgXG4gIHNlcGFyYXRlKG5laWdoYm9yaG9vZCxpbnRvPWMoXCJjb2RlXCIsXCJuYW1lXCIpLHNlcCA9IFwiOlwiKSAlPiVcbiAgbXV0YXRlKGNvZGU9Y2FzZV93aGVuKFxuICAgIGNvZGU9PVwiTjM1XCIgflwiTjBcIixcbiAgICBUUlVFIH4gY29kZVxuICApKVxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfY2FzZXM9ZGZfYyAlPiVcbiAgZmlsdGVyKGFzX2RhdGUoZGF0ZSkgPT0gXCIyMDIxLTExLTE3XCIpICU+JSBcbiAgc2VwYXJhdGUobmVpZ2hib3Job29kLGludG89YyhcImNvZGVcIixcIm5hbWVcIiksc2VwID0gXCI6XCIpICU+JVxuICBtdXRhdGUoY29kZT1jYXNlX3doZW4oXG4gICAgY29kZT09XCJOMzVcIiB+XCJOMFwiLFxuICAgIFRSVUUgfiBjb2RlXG4gICkpXG5gYGAifQ== -->
 <pre class="r"><code>df_cases=df_c %&gt;%
-  #filter(as_date(date) == &quot;2021-11-17&quot;) %&gt;% 
+  filter(as_date(date) == &quot;2021-11-17&quot;) %&gt;% 
   separate(neighborhood,into=c(&quot;code&quot;,&quot;name&quot;),sep = &quot;:&quot;) %&gt;%
   mutate(code=case_when(
     code==&quot;N35&quot; ~&quot;N0&quot;,
@@ -302,37 +309,47 @@ neighborhoods &lt;- sf::read_sf(&quot;../data/raw/dc-neighborhoods&quot;)
   summarise(riders = n()) %&gt;%
   drop_na()</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiYHN1bW1hcmlzZSgpYCBoYXMgZ3JvdXBlZCBvdXRwdXQgYnkgJ3N0YXJ0X2RhdGUnLiBZb3UgY2FuIG92ZXJyaWRlIHVzaW5nIHRoZSBgLmdyb3Vwc2AgYXJndW1lbnQuXG4ifQ== -->
+<pre><code>`summarise()` has grouped output by &#39;start_date&#39;. You can override using the `.groups` argument.</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Add coordinates of stations by joining.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmlkZXJzX2RheV9sb2MgPC0gbGVmdF9qb2luKHJpZGVyc19kYXksIHN0YXRpb25zLCBieSA9IFwic3RhcnRfc3RhdGlvbl9uYW1lXCIpXG5gYGAifQ== -->
+<pre class="r"><code>riders_day_loc &lt;- left_join(riders_day, stations, by = &quot;start_station_name&quot;)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Change to sf format.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGYgPC0gc3RfaW50ZXJzZWN0cyhuZWlnaDIsIHJpZGVyc19zZilcbmludCA8LSBkZltbMV1dXG5gYGAifQ== -->
-<pre class="r"><code>df &lt;- st_intersects(neigh2, riders_sf)
-int &lt;- df[[1]]</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmlkZXJzX3NmIDwtIHN0X2FzX3NmKHJpZGVyc19kYXlfbG9jLCBjb29yZHMgPSBjKFwic3RhcnRfbG5nXCIsIFwic3RhcnRfbGF0XCIpLCBjcnMgPSA0MzI2KVxuYGBgIn0= -->
+<pre class="r"><code>riders_sf &lt;- st_as_sf(riders_day_loc, coords = c(&quot;start_lng&quot;, &quot;start_lat&quot;), crs = 4326)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>might use <a href="https://www.jessesadler.com/post/geocoding-with-r/" class="uri">https://www.jessesadler.com/post/geocoding-with-r/</a></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfdHJhbnMgPC0gZGZfY2FzZXMgJT4lIHN0X3RyYW5zZm9ybSg0MzI2KVxuYGBgIn0= -->
-<pre class="r"><code>df_trans &lt;- df_cases %&gt;% st_transform(4326)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RhdGlvbnNfbmVpZ2ggPC0gc3Rfam9pbihyaWRlcnNfc2YsIG5laWdoMiwgam9pbiA9IHN0X2ludGVyc2VjdHMpXG5gYGAifQ== -->
+<pre class="r"><code>stations_neigh &lt;- st_join(riders_sf, neigh2, join = st_intersects)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Remove some unnecessary columns.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGYgPC0gc3RhdGlvbnNfbmVpZ2ggJT4lXG4gIHNlbGVjdCgtYyhuYW1lLngsIG5hbWUueSwgc2hhcGVhcmVhLCBzaGFwZWxlbiwgb2JqZWN0aWQsIGRhdGUpKSAlPiVcbiAgcmVuYW1lKG5laWdoID0gZGNfaHBuX25hbWUpXG5gYGAifQ== -->
+<pre class="r"><code>df &lt;- stations_neigh %&gt;%
+  select(-c(name.x, name.y, shapearea, shapelen, objectid, date)) %&gt;%
+  rename(neigh = dc_hpn_name)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3J9CmxpYnJhcnkocmVhZHIpCmxpYnJhcnkoc2YpCmxpYnJhcnkodG1hcCkKbGlicmFyeSh0aWR5dmVyc2UpCmxpYnJhcnkoZHBseXIpCmxpYnJhcnkoaGVyZSkKbGlicmFyeShqYW5pdG9yKQpsaWJyYXJ5KGx1YnJpZGF0ZSkKbGlicmFyeSh0aWR5Y2Vuc3VzKQpsaWJyYXJ5KGdnbWFwKQpgYGAKCgpgYGB7cn0KdXJsIDwtICJodHRwczovL3MzLmFtYXpvbmF3cy5jb20vY2FwaXRhbGJpa2VzaGFyZS1kYXRhLzIwMjEwOS1jYXBpdGFsYmlrZXNoYXJlLXRyaXBkYXRhLnppcCIKCmRvd25sb2FkLmZpbGUodXJsLCBkZXN0ZmlsZSA9ICIuLi9kYXRhL3Jhdy9jYXBpdGFsc2hhcmUuY3N2LnppcCIsIG1vZGUgPSAid2IiKQp1bnppcCgiLi4vZGF0YS9yYXcvY2FwaXRhbHNoYXJlLmNzdi56aXAiLCBleGRpciA9ICIuLi9kYXRhL3JhdyIpCmBgYAoKYGBge3J9CmNhcGl0YWxzaGFyZSA8LSByZWFkX2NzdigiLi4vZGF0YS9yYXcvMjAyMTA5LWNhcGl0YWxiaWtlc2hhcmUtdHJpcGRhdGEuY3N2Iiwgc2hvd19jb2xfdHlwZXMgPSBGQUxTRSkKCnN0YXRpb25zIDwtIGNhcGl0YWxzaGFyZSAlPiUKICBzZWxlY3Qoc3RhcnRfc3RhdGlvbl9uYW1lLCBzdGFydF9sYXQsIHN0YXJ0X2xuZykgJT4lCiAgZGlzdGluY3Qoc3RhcnRfc3RhdGlvbl9uYW1lLCAua2VlcF9hbGw9VFJVRSkKCm5laWdoYm9yaG9vZHMgPC0gc2Y6OnJlYWRfc2YoIi4uL2RhdGEvcmF3L2RjLW5laWdoYm9yaG9vZHMiKQojZ2dwbG90KG5laWdoYm9yaG9vZHMpK2dlb21fc2YoKQojcGxvdChuZWlnaGJvcmhvb2RzKQpgYGAKClJlYWQgaW4gZ2VvanNvbiBmaWxlIGZyb20gdGhlIGRjLWhlYWx0aC1wbGFubmluZy1uZWlnaGJvcmhvb2RzIG9wZW4gZGMgcGFnZS4KCmBgYHtyfQpuZWlnaCA9IHN0X3JlYWQoaGVyZSgiZGF0YSIsICJyYXciLCAiZGNfbmVpZ2guZ2VvanNvbiIpKSAlPiUgY2xlYW5fbmFtZXMoKQpgYGAKCmBgYHtyfQpkZl9jPXJlYWR4bDo6cmVhZF9leGNlbChoZXJlKCJkYXRhIiwicmF3IiwibmVpZ2hfY2FzZXMueGxzeCIpLCBjb2xfdHlwZXMgPSBjKCJkYXRlIiwgInRleHQiLCAibnVtZXJpYyIpKSAlPiUgY2xlYW5fbmFtZXMoKQpgYGAKCmBgYHtyfQpkZl9jYXNlcz1kZl9jICU+JQogICNmaWx0ZXIoYXNfZGF0ZShkYXRlKSA9PSAiMjAyMS0xMS0xNyIpICU+JSAKICBzZXBhcmF0ZShuZWlnaGJvcmhvb2QsaW50bz1jKCJjb2RlIiwibmFtZSIpLHNlcCA9ICI6IikgJT4lCiAgbXV0YXRlKGNvZGU9Y2FzZV93aGVuKAogICAgY29kZT09Ik4zNSIgfiJOMCIsCiAgICBUUlVFIH4gY29kZQogICkpCmBgYAoKCmBgYHtyfQpuZWlnaDI9bGVmdF9qb2luKG5laWdoLGRmX2Nhc2VzLGJ5PWMoImNvZGUiKSkKYGBgCgpEZXRlcm1pbmUgdGhlIG51bWJlciBvZiByaWRlcnMgdGhhdCBzdGFydGVkIG9uIGVhY2ggZGF5IHBlciBzdGF0aW9uLgoKYGBge3J9CnJpZGVyc19kYXkgPC0gY2FwaXRhbHNoYXJlICU+JQogICNzZWxlY3Qoc3RhcnRlZF9hdCwgZW5kZWRfYXQsIHN0YXJ0X3N0YXRpb25fbmFtZSwgZW5kX3N0YXRpb25fbmFtZSwgc3RhcnRfbGF0LCBzdGFydF9sbmcsIGVuZF9sYXQsIGVuZF9sbmcpICU+JQogIG11dGF0ZShzdGFydF9kYXRlID0gZGF0ZShzdGFydGVkX2F0KSwgZW5kX2RhdGUgPSBkYXRlKGVuZGVkX2F0KSkgJT4lCiAgZ3JvdXBfYnkoc3RhcnRfZGF0ZSwgc3RhcnRfc3RhdGlvbl9uYW1lKSAlPiUKICBzdW1tYXJpc2UocmlkZXJzID0gbigpKSAlPiUKICBkcm9wX25hKCkKYGBgCgpBZGQgY29vcmRpbmF0ZXMgb2Ygc3RhdGlvbnMgYnkgam9pbmluZy4KCmBgYHtyfQpyaWRlcnNfZGF5X2xvYyA8LSBsZWZ0X2pvaW4ocmlkZXJzX2RheSwgc3RhdGlvbnMsIGJ5ID0gInN0YXJ0X3N0YXRpb25fbmFtZSIpCmBgYAoKQ2hhbmdlIHRvIHNmIGZvcm1hdC4KCmBgYHtyfQpyaWRlcnNfc2YgPC0gc3RfYXNfc2YocmlkZXJzX2RheV9sb2MsIGNvb3JkcyA9IGMoInN0YXJ0X2xuZyIsICJzdGFydF9sYXQiKSwgY3JzID0gNDMyNikKYGBgCgpgYGB7cn0KZGYgPC0gc3RfaW50ZXJzZWN0cyhuZWlnaDIsIHJpZGVyc19zZikKaW50IDwtIGRmW1sxXV0KYGBgCgoKCgoKbWlnaHQgdXNlIGh0dHBzOi8vd3d3Lmplc3Nlc2FkbGVyLmNvbS9wb3N0L2dlb2NvZGluZy13aXRoLXIvCgpgYGB7cn0KZGZfdHJhbnMgPC0gZGZfY2FzZXMgJT4lIHN0X3RyYW5zZm9ybSg0MzI2KQpgYGAKCgoKCgoKCgoKCgoKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3J9CmxpYnJhcnkocmVhZHIpCmxpYnJhcnkoc2YpCmxpYnJhcnkodG1hcCkKbGlicmFyeSh0aWR5dmVyc2UpCmxpYnJhcnkoZHBseXIpCmxpYnJhcnkoaGVyZSkKbGlicmFyeShqYW5pdG9yKQpsaWJyYXJ5KGx1YnJpZGF0ZSkKbGlicmFyeSh0aWR5Y2Vuc3VzKQpsaWJyYXJ5KGdnbWFwKQpgYGAKCgpgYGB7cn0KdXJsIDwtICJodHRwczovL3MzLmFtYXpvbmF3cy5jb20vY2FwaXRhbGJpa2VzaGFyZS1kYXRhLzIwMjEwOS1jYXBpdGFsYmlrZXNoYXJlLXRyaXBkYXRhLnppcCIKCmRvd25sb2FkLmZpbGUodXJsLCBkZXN0ZmlsZSA9IGhlcmUoImRhdGEiLCAicmF3IiwgImNhcGl0YWxzaGFyZS5jc3YuemlwIiksIG1vZGUgPSAid2IiKQp1bnppcChoZXJlKCJkYXRhIiwgInJhdyIsICJjYXBpdGFsc2hhcmUuY3N2LnppcCIpLCBleGRpciA9IGhlcmUoImRhdGEiLCAicmF3IikpCmBgYAoKYGBge3J9CmNhcGl0YWxzaGFyZSA8LSByZWFkX2NzdihoZXJlKCJkYXRhIiwgInJhdyIsICIyMDIxMDktY2FwaXRhbGJpa2VzaGFyZS10cmlwZGF0YS5jc3YiKSwgc2hvd19jb2xfdHlwZXMgPSBGQUxTRSkKCnN0YXRpb25zIDwtIGNhcGl0YWxzaGFyZSAlPiUKICBzZWxlY3Qoc3RhcnRfc3RhdGlvbl9uYW1lLCBzdGFydF9sYXQsIHN0YXJ0X2xuZykgJT4lCiAgZGlzdGluY3Qoc3RhcnRfc3RhdGlvbl9uYW1lLCAua2VlcF9hbGw9VFJVRSkKCm5laWdoYm9yaG9vZHMgPC0gc2Y6OnJlYWRfc2YoaGVyZSgiZGF0YSIsICJyYXciLCAiZGMtbmVpZ2hib3Job29kcyIpKQoKYGBgCgpSZWFkIGluIGdlb2pzb24gZmlsZSBmcm9tIHRoZSBkYy1oZWFsdGgtcGxhbm5pbmctbmVpZ2hib3Job29kcyBvcGVuIGRjIHBhZ2UuCgpgYGB7cn0KbmVpZ2ggPSBzdF9yZWFkKGhlcmUoImRhdGEiLCAicmF3IiwgImRjX25laWdoLmdlb2pzb24iKSkgJT4lIGNsZWFuX25hbWVzKCkKYGBgCgpgYGB7cn0KZGZfYz1yZWFkeGw6OnJlYWRfZXhjZWwoaGVyZSgiZGF0YSIsInJhdyIsIm5laWdoX2Nhc2VzLnhsc3giKSwgY29sX3R5cGVzID0gYygiZGF0ZSIsICJ0ZXh0IiwgIm51bWVyaWMiKSkgJT4lIGNsZWFuX25hbWVzKCkKYGBgCgpgYGB7cn0KZGZfY2FzZXM9ZGZfYyAlPiUKICBmaWx0ZXIoYXNfZGF0ZShkYXRlKSA9PSAiMjAyMS0xMS0xNyIpICU+JSAKICBzZXBhcmF0ZShuZWlnaGJvcmhvb2QsaW50bz1jKCJjb2RlIiwibmFtZSIpLHNlcCA9ICI6IikgJT4lCiAgbXV0YXRlKGNvZGU9Y2FzZV93aGVuKAogICAgY29kZT09Ik4zNSIgfiJOMCIsCiAgICBUUlVFIH4gY29kZQogICkpCmBgYAoKCmBgYHtyfQpuZWlnaDI9bGVmdF9qb2luKG5laWdoLGRmX2Nhc2VzLGJ5PWMoImNvZGUiKSkKYGBgCgpEZXRlcm1pbmUgdGhlIG51bWJlciBvZiByaWRlcnMgdGhhdCBzdGFydGVkIG9uIGVhY2ggZGF5IHBlciBzdGF0aW9uLgoKYGBge3J9CnJpZGVyc19kYXkgPC0gY2FwaXRhbHNoYXJlICU+JQogIG11dGF0ZShzdGFydF9kYXRlID0gZGF0ZShzdGFydGVkX2F0KSwgZW5kX2RhdGUgPSBkYXRlKGVuZGVkX2F0KSkgJT4lCiAgZ3JvdXBfYnkoc3RhcnRfZGF0ZSwgc3RhcnRfc3RhdGlvbl9uYW1lKSAlPiUKICBzdW1tYXJpc2UocmlkZXJzID0gbigpKSAlPiUKICBkcm9wX25hKCkKYGBgCgpBZGQgY29vcmRpbmF0ZXMgb2Ygc3RhdGlvbnMgYnkgam9pbmluZy4KCmBgYHtyfQpyaWRlcnNfZGF5X2xvYyA8LSBsZWZ0X2pvaW4ocmlkZXJzX2RheSwgc3RhdGlvbnMsIGJ5ID0gInN0YXJ0X3N0YXRpb25fbmFtZSIpCmBgYAoKQ2hhbmdlIHRvIHNmIGZvcm1hdC4KCmBgYHtyfQpyaWRlcnNfc2YgPC0gc3RfYXNfc2YocmlkZXJzX2RheV9sb2MsIGNvb3JkcyA9IGMoInN0YXJ0X2xuZyIsICJzdGFydF9sYXQiKSwgY3JzID0gNDMyNikKYGBgCgpgYGB7cn0Kc3RhdGlvbnNfbmVpZ2ggPC0gc3Rfam9pbihyaWRlcnNfc2YsIG5laWdoMiwgam9pbiA9IHN0X2ludGVyc2VjdHMpCmBgYAoKUmVtb3ZlIHNvbWUgdW5uZWNlc3NhcnkgY29sdW1ucy4KCmBgYHtyfQpkZiA8LSBzdGF0aW9uc19uZWlnaCAlPiUKICBzZWxlY3QoLWMobmFtZS54LCBuYW1lLnksIHNoYXBlYXJlYSwgc2hhcGVsZW4sIG9iamVjdGlkLCBkYXRlKSkgJT4lCiAgcmVuYW1lKG5laWdoID0gZGNfaHBuX25hbWUpCmBgYAoKCgoKCgoKCgoKCg==</div>
 
 
 
