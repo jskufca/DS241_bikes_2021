@@ -56,6 +56,43 @@ df_cases=df_c %>%
   ))
 ```
 
+
+```{r}
+neigh2=left_join(neigh,df_cases,by=c("code"))
+```
+
+Determine the number of riders that started on each day per station.
+
+```{r}
+riders_day <- capitalshare %>%
+  #select(started_at, ended_at, start_station_name, end_station_name, start_lat, start_lng, end_lat, end_lng) %>%
+  mutate(start_date = date(started_at), end_date = date(ended_at)) %>%
+  group_by(start_date, start_station_name) %>%
+  summarise(riders = n()) %>%
+  drop_na()
+```
+
+Add coordinates of stations by joining.
+
+```{r}
+riders_day_loc <- left_join(riders_day, stations, by = "start_station_name")
+```
+
+Change to sf format.
+
+```{r}
+riders_sf <- st_as_sf(riders_day_loc, coords = c("start_lng", "start_lat"), crs = 4326)
+```
+
+```{r}
+df <- st_intersects(neigh2, riders_sf)
+int <- df[[1]]
+```
+
+
+
+
+
 might use https://www.jessesadler.com/post/geocoding-with-r/
 
 ```{r}
