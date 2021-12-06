@@ -4,6 +4,8 @@ output: html_notebook
 ---
 
 ```{r}
+library(devtools)
+install.packages("sf")
 library(tidyverse)
 library(sf)
 library(tidycensus)
