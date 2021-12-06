@@ -47,6 +47,7 @@ df_c=readxl::read_excel(here("data","raw","neigh_cases.xlsx"), col_types = c("da
 
 ```{r}
 df_cases=df_c %>%
+  # (cumulative) data is only given up to Nov 17.
   filter(as_date(date) == "2021-11-17") %>% 
   separate(neighborhood,into=c("code","name"),sep = ":") %>%
   mutate(code=case_when(
@@ -55,6 +56,7 @@ df_cases=df_c %>%
   ))
 ```
 
+Join neighborhood data with cases.
 
 ```{r}
 neigh2=left_join(neigh,df_cases,by=c("code"))
@@ -82,6 +84,8 @@ Change to sf format.
 riders_sf <- st_as_sf(riders_day_loc, coords = c("start_lng", "start_lat"), crs = 4326)
 ```
 
+Spatial join the ridership per day with the neighborhood so we can have which neighborhood each station is in.
+
 ```{r}
 stations_neigh <- st_join(riders_sf, neigh2, join = st_intersects)
 ```
@@ -89,7 +93,7 @@ stations_neigh <- st_join(riders_sf, neigh2, join = st_intersects)
 Remove some unnecessary columns.
 
 ```{r}
-df <- stations_neigh %>%
+neigh_covid_stations <- stations_neigh %>%
   select(-c(name.x, name.y, shapearea, shapelen, objectid, date)) %>%
   rename(neigh = dc_hpn_name)
 ```
