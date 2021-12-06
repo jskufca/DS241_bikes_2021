@@ -21,3 +21,9 @@ library(readxl)
 ```{r}
 DF1 <- read.csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
 ```
+
+## Filter Data to D.C.
+```{r}
+DC <- DF1 %>%
+  filter(state == "DC")
+```
