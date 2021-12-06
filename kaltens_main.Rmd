@@ -1,6 +1,6 @@
 ---
 title: "Demographic data (Census) in Washington D.C."
-author: "Sebastian Kaltenbach
+author: "Sebastian Kaltenbach"
 output: html_notebook
 ---
 
@@ -9,11 +9,11 @@ Load required packages for the specific analysis.
 ```{r}
 library(tidycensus) # Access census data
 library(tidyverse)
-library(sf)         # working with simple features - geospatial
+library(sf)         # Working with simple features - geospatial
 library(tmap)
-library(lubridate)  # because we will probably see some dates
+library(lubridate)  # Because we will probably see some dates
 library(janitor)
-library(here)       # a package I haven't taught you about before that doesn't do much, but ....
+library(here)       # A package I haven't taught you about before that doesn't do much, but ....
 ```
 
 Define the API key to access latest census data directly from the U.S. Department of Commerce.
@@ -46,7 +46,7 @@ Age; Gender; Ethnicity; Income; Level of education; Religion; Occupation; Family
 v20 <- load_variables(2018, "acs5", cache = TRUE)
 ```
 
-## Get census data
+## The census data
 
 ```{r}
 df_census <- get_acs(geography = "tract",                  
@@ -65,6 +65,8 @@ class(df_census)
 plot(df_census)
 ```
 
+Clean the provided census dataset and add percentages for population and sex.
+
 ```{r}
 df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
   mutate(pop_black_pct = pop_black/pop, 
@@ -72,6 +74,8 @@ df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
          male_pct=male/pop,
          female_pct=female/pop)
 ```
+
+Visualize demographic outcome in maps.
 
 ```{r}
 # Visualize median income in Washington D.C.
@@ -91,11 +95,13 @@ tm_shape(df_cens) +tm_polygons("female",alpha=.5)
 
 ```
 
-Data is easily readable 
+# The Neighborhood Data
+
 ```{r}
 neigh=st_read("DC_Health_Planning_Neighborhoods.geojson") %>% clean_names()
 class(neigh)
 ```
+# The Covid Data
 
 ```{r message=FALSE, warning=FALSE}
 df_c=readxl::read_excel("neigh_cases.xlsx",
@@ -103,11 +109,11 @@ df_c=readxl::read_excel("neigh_cases.xlsx",
   clean_names() 
 df_cases=df_c %>%
   filter(as_date(date) == "2021-11-17") %>% 
-  separate(neighborhood,into=c("code","name"),sep = ":") %>%
-  mutate(code=case_when(
-    code=="N35" ~"N0",
-    TRUE ~ code
-  ))
+  separate(neighborhood,into=c("code","name"),sep = ":") #%>%
+  #mutate(code=case_when(
+  #  code=="N35" ~"N0",
+  #  TRUE ~ code
+  #))
 ```
 
 ## Regular joining (of dataframes)
@@ -149,4 +155,8 @@ df1=df_j %>% select(median_inc, pop, pop_black, pop_white, age, male, female, ob
             age_n=sum(age)/n(),
             adj_median_income=sum(pop*median_inc)/pop_n) 
 plot(df1)
+```
+# Join demographic data with covid data
+```{r}
+
 ```
