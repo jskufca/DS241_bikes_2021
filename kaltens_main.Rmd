@@ -4,18 +4,22 @@ author: "Sebastian Kaltenbach
 output: html_notebook
 ---
 
+Load required packages for the specific analysis.
+
 ```{r}
-library(tidycensus)
+library(tidycensus) # Access census data
 library(tidyverse)
-library(sf) # working with simple features - geospatial
+library(sf)         # working with simple features - geospatial
 library(tmap)
-library(lubridate) # because we will probably see some dates
+library(lubridate)  # because we will probably see some dates
 library(janitor)
-library(here) # a package I haven't taught you about before that doesn't do much, but ....
+library(here)       # a package I haven't taught you about before that doesn't do much, but ....
+```
 
-options(tigris_use_cache = TRUE)
+Define the API key to access latest census data directly from the U.S. Department of Commerce.
 
-#census_api_key("72ced2515c5a0d9cc250f2fd9772b7cc36aad262", install = TRUE)
+```{r}
+census_api_key("72ced2515c5a0d9cc250f2fd9772b7cc36aad262")
 ```
 
 Required Census codes for demographic variables. Selection is based on most popular demographic values:
@@ -24,6 +28,10 @@ Age; Gender; Ethnicity; Income; Level of education; Religion; Occupation; Family
 
 
 - **B01002_001**    Age distribution in D.C.
+
+- **B01001_002**    Sex (Male)
+
+- **B01001_026**    Sex (Female)
 
 - **B01001_001**    Total population
 
@@ -46,7 +54,9 @@ df_census <- get_acs(geography = "tract",
                               "pop"="B01001_001",
                               "pop_white"="B01001H_001",
                               "pop_black"="B02009_001",
-                              "age"="B01002_001"),
+                              "age"="B01002_001",
+                              "male"="B01001_002",
+                              "female"="B01001_026"),
                   state="DC",geometry=TRUE,year=2018) %>%
   clean_names()
 ```
@@ -57,8 +67,28 @@ plot(df_census)
 
 ```{r}
 df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
-  mutate(pop_black_pct = pop_black/pop, pop_white_pct=pop_white/pop)
+  mutate(pop_black_pct = pop_black/pop, 
+         pop_white_pct=pop_white/pop, 
+         male_pct=male/pop,
+         female_pct=female/pop)
+```
+
+```{r}
+# Visualize median income in Washington D.C.
 tm_shape(df_cens) +tm_polygons("median_inc",alpha=.5)
+# Visualize age in Washington D.C.
+tm_shape(df_cens) +tm_polygons("age",alpha=.5)
+# Visualize population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("pop",alpha=.5)
+# Visualize black population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("pop_black",alpha=.5)
+# Visualize white population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("pop_white",alpha=.5)
+# Visualize white population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("male",alpha=.5)
+# Visualize white population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("female",alpha=.5)
+
 ```
 
 Data is easily readable 
