@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Group 2: Merging Bikeshare Data"
 output: html_notebook
 ---
 
@@ -92,15 +92,31 @@ stations_neigh <- st_join(riders_sf, neigh2, join = st_intersects)
 
 Remove some unnecessary columns.
 
+###############
+remove covid data from dataframe
+summarize ridership per neighborhood (all in september)
+categorize ridership by member or casual
+
 ```{r}
 neigh_covid_stations <- stations_neigh %>%
-  select(-c(name.x, name.y, shapearea, shapelen, objectid, date)) %>%
-  rename(neigh = dc_hpn_name)
+  select(-c(name.x, name.y, shapearea, shapelen, date, total_positives)) %>%
+  rename(neigh = dc_hpn_name, date = start_date) 
 ```
 
 
+```{r}
+df_cases_all <- df_c %>%
+  separate(neighborhood,into=c("code","neigh"),sep = ":") %>%
+  mutate(code=case_when(
+    code=="N35" ~"N0",
+    TRUE ~ code
+  ))
 
+df2 <- inner_join(neigh_covid_stations, df_cases_all, by = c("date", "code")) %>%
+  rename(neigh = neigh.x) %>%
+  select(-c(neigh.y))
 
+```
 
 
 
