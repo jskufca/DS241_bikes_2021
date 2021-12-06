@@ -11,3 +11,13 @@ library(readr)
 library(readxl)
 ```
 
+## Data links
+```{r}
+## https://data.cdc.gov/Case-Surveillance/United-States-COVID-19-Cases-and-Deaths-by-State-o/9mfq-cb36/data
+##
+```
+
+## Load Data
+```{r}
+DF1 <- read.csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
+```
