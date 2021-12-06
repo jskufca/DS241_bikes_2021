@@ -96,6 +96,7 @@ Data is easily readable
 neigh=st_read("DC_Health_Planning_Neighborhoods.geojson") %>% clean_names()
 class(neigh)
 ```
+
 ```{r message=FALSE, warning=FALSE}
 df_c=readxl::read_excel("neigh_cases.xlsx",
                             col_types = c("date", "text", "numeric")) %>% 
@@ -122,7 +123,7 @@ tm_shape(neigh2) +tm_polygons("total_positives",alpha=.5)
 ```
 
 ```{r}
-df_j=st_join(df_cens,neigh2,prepared=FALSE)
+#df_j=st_join(df_cens,neigh2,prepared=FALSE)
 ```
 
 ```{r}
@@ -138,12 +139,14 @@ Since we want the geometry for the NEIGHBORHOODS, we need a different work a lit
 Age not correct!!
 
 ```{r}
-df1=df_j %>% select(median_inc, pop, pop_black, pop_white, age, objectid) %>%
+df1=df_j %>% select(median_inc, pop, pop_black, pop_white, age, male, female, objectid) %>%
   group_by(objectid) %>%
   summarise(pop_n=sum(pop),
             pop_black_n=sum(pop_black),
             pop_white_n=sum(pop_white),
-            age_n=sum(age),
+            male_n=sum(male),
+            female_n=sum(female),
+            age_n=sum(age)/n(),
             adj_median_income=sum(pop*median_inc)/pop_n) 
 plot(df1)
 ```
