@@ -18,11 +18,15 @@ library(here)
 
 ### Data
 
+The data was received from https://opendata.dc.gov/search?collection=Dataset&q=crime, where we extracted data for the years 2017. 2018, 2019, 2020 and 2021 (till November). The data is free to use for anyone willing to analyse it for their own purposes.
+
 ```{r, include = FALSE}
-data <- read_csv("https://raw.githubusercontent.com/jskufca/DS241_bikes_2021/shreejit/crime_data/crime_processed/final.csv")
+data <- read.csv("https://raw.githubusercontent.com/jskufca/DS241_bikes_2021/shreejit/data/crime_data/crime_processed/final.csv")
 ```
 
 ### Prepping Data
+
+I renamed various columns so that it is easier for me to know and understand the variables to better use it for visualizations. One of which includes using the `as_datettime` function that converts date format input to date-time format (`YYYY-MM-DD HH:MM:SS`). I renames various variables and formatted the data to something suitable and easily understandable.
 
 ```{r, include = FALSE}
 main <- data %>%
@@ -70,7 +74,7 @@ main <- data %>%
 #### Time of the day
 
 ```{r}
-ggplot(main, aes(fct_infreq(shift), fill=shift)) +
+ggplot(main, aes(fct_infreq(shift))) +
   geom_bar() +
   labs(
     x="Time of Day",
