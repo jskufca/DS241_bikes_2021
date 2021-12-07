@@ -1,0 +1,97 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(readr)
+library(sf)
+library(tmap)
+library(tidyverse)
+library(dplyr)
+library(here)
+library(janitor)
+library(lubridate)
+library(tidycensus)
+library(ggmap)
+```
+
+GOAL: Compute a dataframe with bike stations, rides from that station during the month, and the neighborhood that station is in.
+
+
+Download the capitalshare file from their website. You should only have to do this once, and only if the data is not already there. Although, running again is not bad.
+
+```{r}
+url <- "https://s3.amazonaws.com/capitalbikeshare-data/202109-capitalbikeshare-tripdata.zip"
+
+download.file(url, destfile = here("data", "raw", "capitalshare.csv.zip"), mode = "wb")
+unzip(here("data", "raw", "capitalshare.csv.zip"), exdir = here("data", "raw"))
+```
+
+Read in the capitalshare data.
+
+```{r}
+capitalshare <- read_csv(here("data", "raw", "202109-capitalbikeshare-tripdata.csv"), show_col_types = FALSE)
+
+stations <- capitalshare %>%
+  select(start_station_name, start_lat, start_lng) %>%
+  distinct(start_station_name, .keep_all=TRUE)
+```
+
+Read in geojson file from the dc-health-planning-neighborhoods open dc page, and do some cleaning.
+
+```{r}
+neigh = st_read(here("data", "raw", "dc_neigh.geojson")) %>% 
+  clean_names() %>%
+  separate(name, into=c("code","neigh")) %>%
+  mutate(code=case_when(
+    code=="N35" ~"N0",
+    TRUE ~ code
+  )) %>%
+  select(-c(gis_id, shapearea, shapelen, neigh)) %>%
+  rename(neigh = dc_hpn_name)
+```
+
+Compute riders per station (summarized across the month), and by member status (casual or member of capitalshare).
+
+```{r}
+riders_day <- capitalshare %>%
+  mutate(start_date = date(started_at)) %>%
+  group_by(start_date, start_station_name, member_casual) %>%
+  summarise(riders = n()) %>%
+  drop_na() %>%
+  ungroup()
+
+rides_by_station <- riders_day %>%
+  group_by(start_station_name, member_casual) %>%
+  summarise(riders = sum(riders))
+```
+
+Add coordinates of stations by joining.
+
+```{r}
+riders_day_loc <- left_join(rides_by_station, stations, by = "start_station_name")
+```
+
+Change to sf format.
+
+```{r}
+riders_sf <- st_as_sf(riders_day_loc, coords = c("start_lng", "start_lat"), crs = 4326)
+```
+
+Join with neighborhood data so we know what neighborhood each station is in.
+
+```{r}
+stations_neigh <- st_join(riders_sf, neigh, join = st_intersects)
+```
+
+Remove unnecessary columns and clean things up.
+
+```{r}
+neigh_stats <- stations_neigh %>%
+  select(-c(geometry)) %>%
+  rename( station = start_station_name) 
+```
+
+QED
+

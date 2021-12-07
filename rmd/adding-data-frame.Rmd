@@ -31,7 +31,7 @@ stations <- capitalshare %>%
   select(start_station_name, start_lat, start_lng) %>%
   distinct(start_station_name, .keep_all=TRUE)
 
-neighborhoods <- sf::read_sf(here("data", "raw", "dc-neighborhoods"))
+#neighborhoods <- sf::read_sf(here("data", "raw", "dc-neighborhoods"))
 
 ```
 
@@ -40,6 +40,8 @@ Read in geojson file from the dc-health-planning-neighborhoods open dc page.
 ```{r}
 neigh = st_read(here("data", "raw", "dc_neigh.geojson")) %>% clean_names()
 ```
+
+Read in cases in each neighborhood.
 
 ```{r}
 df_c=readxl::read_excel(here("data","raw","neigh_cases.xlsx"), col_types = c("date", "text", "numeric")) %>% clean_names()
