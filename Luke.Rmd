@@ -1,17 +1,20 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
-## Load packages
+## Load Packages
 ```{r}
 library(tidyverse)
 library(janitor)
 library(readr)
 library(readxl)
+library(ggplot2)
 ```
 
-## Data links
+## Data Links
 ```{r}
 ## https://data.cdc.gov/Case-Surveillance/United-States-COVID-19-Cases-and-Deaths-by-State-o/9mfq-cb36/data
 ## https://opendata.dc.gov/datasets/62f6f28dbfc74ae489fa3dcda9e94744_28/about
@@ -27,4 +30,10 @@ DF2 <- read.csv("DC_COVID-19_Total_Positive_Cases_by_Neighborhood.csv")
 ```{r}
 DC <- DF1 %>%
   filter(state == "DC")
+```
+
+## Plot Neighborhood Data
+```{r}
+ggplot(data = DF2, mapping = aes(x = NEIGHBORHOOD, y = TOTAL_POSITIVES, fill = "DATE_REPORTED")) +
+  geom_col()
 ```
