@@ -23,9 +23,15 @@ census_api_key("72ced2515c5a0d9cc250f2fd9772b7cc36aad262")
 ```
 
 Required Census codes for demographic variables. Selection is based on most popular demographic values:
-
 Age; Gender; Ethnicity; Income
 
+
+Load the available census variables to determine the codes required according to the demographic selection.
+This process is only used in a static way for the determination. The variable "census_vars" is not used anymore, after this code snippet.
+```{r}
+census_vars <- load_variables(2018, "acs5", cache = TRUE)
+```
+By analyzing the codes, the following list matches the defined selection:
 
 - **B01002_001**    Age distribution in D.C.
 
@@ -41,13 +47,8 @@ Age; Gender; Ethnicity; Income
 
 - **B19013_001**    Median household income distribution in D.C.
 
-
-```{r}
-census_vars <- load_variables(2018, "acs5", cache = TRUE)
-```
-
 ## The census data
-
+Gathering the required data using the provided API.
 ```{r}
 df_census <- get_acs(geography = "tract",                  
                   variables=c("median_inc"="B06011_001",
@@ -57,16 +58,16 @@ df_census <- get_acs(geography = "tract",
                               "age"="B01002_001",
                               "male"="B01001_002",
                               "female"="B01001_026"),
-                  state="DC",geometry=TRUE,year=2018) %>%
-  clean_names()
+                  state="DC",geometry=TRUE,year=2018) %>% clean_names()
 ```
+
+Classify and plot the created dataframe.
 ```{r}
 class(df_census)
 plot(df_census)
 ```
 
-Clean the provided census dataset and add percentages for population and sex.
-
+Clean the collected census dataframe and add percentages for population and sex (based on total population).
 ```{r}
 df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
   mutate(pop_black_pct = pop_black/pop, 
@@ -75,8 +76,7 @@ df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
          female_pct=female/pop)
 ```
 
-Visualize demographic outcome in maps.
-
+Define a function, which contains the plot of a map depending on the dataframe and a variable (as string) in form of attributes.
 ```{r}
 print_map <- function(df, variable){
   tm_shape(df) +tm_polygons(variable, alpha=.5)
@@ -119,17 +119,19 @@ print_map(df_cens, "female")
 ```
 
 # The Neighborhood Data
-
+Read the neighborhood geolocation data from the file. 
+The file can be downloaded here https://opendata.dc.gov/datasets/DCGIS::dc-health-planning-neighborhoods/about.
 ```{r}
 neigh=st_read(here("data", "raw", "dc_neigh.geojson")) %>% clean_names()
 class(neigh)
 ```
 # The Covid Data
-
+Read the Covid data from the file
 ```{r message=FALSE, warning=FALSE}
 df_c=readxl::read_excel(here("data", "raw","neigh_cases.xlsx"),
-                            col_types = c("date", "text", "numeric")) %>% 
-  clean_names() 
+                            col_types = c("date", "text", "numeric")) %>% clean_names() 
+
+# Filter and prepare the dataframe for further evaluation
 df_cases=df_c %>%
   filter(as_date(date) == "2021-11-17") %>% 
   separate(neighborhood,into=c("code","name"),sep = ":") %>%
@@ -140,12 +142,14 @@ df_cases=df_c %>%
 ```
 
 ## Regular joining (of dataframes)
-
+Join neighborhoods with cases in new dataframe.
 ```{r}
 neigh2=left_join(neigh,df_cases,by=c("code")) 
 tmap_mode("view")
-tm_shape(neigh2) +tm_polygons("total_positives",alpha=.5)
+# Print total positive cases in map
+print_map(neigh2, "total_positives")
 ```
+
 ```{r}
   tm_shape(neigh2) +tm_borders(col="blue",lwd=5,alpha=.2)+
   tm_shape(df_cens) +tm_borders(col="red",lwd=1,alpha=.3)
