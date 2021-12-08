@@ -93,5 +93,27 @@ neigh_stats <- stations_neigh %>%
   rename( station = start_station_name) 
 ```
 
+Summarizing by neighborhood to get each one only once in the data frame.
+
+```{r}
+df <- neigh_stats %>%
+  group_by(neigh, member_casual) %>%
+  summarise(tot_riders = sum(riders))
+
+df2 <- df %>%
+  mutate(
+    riders_casual = case_when(member_casual == "casual" ~ tot_riders),
+    riders_member = case_when(member_casual == "member" ~ tot_riders)
+  ) %>%
+  group_by(neigh) %>%
+  summarise(riders_casual = sum(riders_casual, na.rm = TRUE), riders_member = sum(riders_member, na.rm = TRUE)) %>%
+  mutate(
+    tot_riders = riders_casual + riders_member
+  )
+```
+
+
+
+
 QED
 
