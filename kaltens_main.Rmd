@@ -1,6 +1,6 @@
 ---
-title: "Demographic data (Census) in Washington D.C."
-author: "Sebastian Kaltenbach"
+title: "Demographic data (Census Data) in Washington D.C."
+author: "Team 3 - Demographics"
 output: html_notebook
 ---
 
@@ -17,14 +17,14 @@ library(here)       # A package I haven't taught you about before that doesn't d
 ```
 
 Define the API key to access latest census data directly from the U.S. Department of Commerce.
-
+To get your specific (individual) API key, please visit https://api.census.gov/data/key_signup.html.
 ```{r}
 census_api_key("72ced2515c5a0d9cc250f2fd9772b7cc36aad262")
 ```
 
 Required Census codes for demographic variables. Selection is based on most popular demographic values:
 
-Age; Gender; Ethnicity; Income; Level of education; Religion; Occupation; Family structure
+Age; Gender; Ethnicity; Income
 
 
 - **B01002_001**    Age distribution in D.C.
@@ -43,7 +43,7 @@ Age; Gender; Ethnicity; Income; Level of education; Religion; Occupation; Family
 
 
 ```{r}
-v20 <- load_variables(2018, "acs5", cache = TRUE)
+census_vars <- load_variables(2018, "acs5", cache = TRUE)
 ```
 
 ## The census data
@@ -78,21 +78,44 @@ df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
 Visualize demographic outcome in maps.
 
 ```{r}
-# Visualize median income in Washington D.C.
-tm_shape(df_cens) +tm_polygons("median_inc",alpha=.5)
-# Visualize age in Washington D.C.
-tm_shape(df_cens) +tm_polygons("age",alpha=.5)
-# Visualize population in Washington D.C.
-tm_shape(df_cens) +tm_polygons("pop",alpha=.5)
-# Visualize black population in Washington D.C.
-tm_shape(df_cens) +tm_polygons("pop_black",alpha=.5)
-# Visualize white population in Washington D.C.
-tm_shape(df_cens) +tm_polygons("pop_white",alpha=.5)
-# Visualize white population in Washington D.C.
-tm_shape(df_cens) +tm_polygons("male",alpha=.5)
-# Visualize white population in Washington D.C.
-tm_shape(df_cens) +tm_polygons("female",alpha=.5)
+print_map <- function(df, variable){
+  tm_shape(df) +tm_polygons(variable, alpha=.5)
+}
+```
 
+Visualize the median income distribution in Washington D.C.
+```{r}
+print_map(df_cens, "median_inc")
+```
+
+Visualize the age distribution in Washington D.C.
+```{r}
+print_map(df_cens, "age")
+```
+
+Visualize the population distribution in Washington D.C.
+```{r}
+print_map(df_cens, "pop")
+```
+
+Visualize the black population  distribution in Washington D.C.
+```{r}
+print_map(df_cens, "pop_black")
+```
+
+Visualize the white population distribution in Washington D.C.
+```{r}
+print_map(df_cens, "pop_white")
+```
+
+Visualize the male (sex) distribution Washington D.C.
+```{r}
+print_map(df_cens, "male")
+```
+
+Visualize the female (sex) distribution in Washington D.C.
+```{r}
+print_map(df_cens, "female")
 ```
 
 # The Neighborhood Data
@@ -109,11 +132,11 @@ df_c=readxl::read_excel("neigh_cases.xlsx",
   clean_names() 
 df_cases=df_c %>%
   filter(as_date(date) == "2021-11-17") %>% 
-  separate(neighborhood,into=c("code","name"),sep = ":") #%>%
-  #mutate(code=case_when(
-  #  code=="N35" ~"N0",
-  #  TRUE ~ code
-  #))
+  separate(neighborhood,into=c("code","name"),sep = ":") %>%
+  mutate(code=case_when(
+    code=="N35" ~"N0",
+    TRUE ~ code
+  ))
 ```
 
 ## Regular joining (of dataframes)
@@ -129,10 +152,6 @@ tm_shape(neigh2) +tm_polygons("total_positives",alpha=.5)
 ```
 
 ```{r}
-#df_j=st_join(df_cens,neigh2,prepared=FALSE)
-```
-
-```{r}
 df_cens_adj=df_cens %>% st_transform(4326)
 ```
 
@@ -142,10 +161,8 @@ df_j=st_join(df_cens_adj,neigh2,largest=TRUE)
 
 Since we want the geometry for the NEIGHBORHOODS, we need a different work a little harder:
 
-Age not correct!!
-
 ```{r}
-df1=df_j %>% select(median_inc, pop, pop_black, pop_white, age, male, female, objectid) %>%
+df1=df_j %>% select(median_inc, pop, pop_black, pop_white, age, male, female, total_positives, objectid) %>%
   group_by(objectid) %>%
   summarise(pop_n=sum(pop),
             pop_black_n=sum(pop_black),
@@ -153,10 +170,7 @@ df1=df_j %>% select(median_inc, pop, pop_black, pop_white, age, male, female, ob
             male_n=sum(male),
             female_n=sum(female),
             age_n=sum(age)/n(),
-            adj_median_income=sum(pop*median_inc)/pop_n) 
+            adj_median_income=sum(pop*median_inc)/pop_n,
+            total_positives_n=sum(total_positives)/n()) 
 plot(df1)
-```
-# Join demographic data with covid data
-```{r}
-
 ```
