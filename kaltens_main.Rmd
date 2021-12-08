@@ -121,13 +121,13 @@ print_map(df_cens, "female")
 # The Neighborhood Data
 
 ```{r}
-neigh=st_read("DC_Health_Planning_Neighborhoods.geojson") %>% clean_names()
+neigh=st_read(here("data", "raw", "dc_neigh.geojson")) %>% clean_names()
 class(neigh)
 ```
 # The Covid Data
 
 ```{r message=FALSE, warning=FALSE}
-df_c=readxl::read_excel("neigh_cases.xlsx",
+df_c=readxl::read_excel(here("data", "raw","neigh_cases.xlsx"),
                             col_types = c("date", "text", "numeric")) %>% 
   clean_names() 
 df_cases=df_c %>%
