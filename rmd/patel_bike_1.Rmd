@@ -1,30 +1,171 @@
 ---
-title: "patel_bike_1"
+title: "Demographic DC tidycensus data analysis"
 author: "Tarak Patel"
-date: "11/15/2021"
 output: html_notebook
 ---
+## Install and load packages
+Load required packages for the specific analysis.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+library(tidycensus) # Access census data
+library(tidyverse)
+library(sf)         # Working with simple features - geospatial features
+library(tmap)
+library(lubridate)  
+library(janitor)    # To clean names of variables in the data
+library(here)       # A package I haven't taught you about before that doesn't do much, but ....
 ```
 
-## R Markdown
+Going to need an API key to access the data. We can acquire a key from the following website: http://api.census.gov/data/key_signup.html 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+census_api_key("ef8a7b63162e3c4881110f495943872be80639fd", install = TRUE)
 ```
 
-## Including Plots
+Required Census codes for demographic variables. Selection is based on most popular demographic values:
+Age; Gender; Ethnicity; Income; Level of education; Religion; Occupation; Family structure
 
-You can also embed plots, for example:
+- **B01002_001**    DC Age Distribution
+- **B01001_002**    Sex (M)
+- **B01001_026**    Sex (F)
+- **B01001_001**    Total population
+- **B01001H_001**   Population (white)
+- **B02009_001**    Population (black)
+- **B19013_001**    Median household income distribution in D.C.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+```{r}
+v20 <- load_variables(2018, "acs5", cache = TRUE)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Getting 2018 DC Census Data
+
+```{r}
+df_census <- get_acs(geography = "tract",                  
+                  variables=c("median_inc"="B06011_001",
+                              "pop_tot"="B01001_001",
+                              "pop_white"="B01001H_001",
+                              "pop_black"="B02009_001",
+                              "age"="B01002_001",
+                              "male"="B01001_002",
+                              "female"="B01001_026"),
+                  state="DC",geometry=TRUE,year=2018) %>%
+  clean_names()
+```
+```{r}
+class(df_census)
+plot(df_census)
+```
+
+Now we should clean the census data set and add percentages for population and sex variables.
+
+```{r}
+df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
+  mutate(pop_black_pct = pop_black/pop_tot, 
+         pop_white_pct=pop_white/pop_tot, 
+         male_pct=male/pop_tot,
+         female_pct=female/pop_tot)
+```
+
+Visualize demographic outcome in maps.
+
+```{r}
+# Visualize median income in Washington D.C.
+tm_shape(df_cens) +tm_polygons("median_inc",alpha=.5)
+# Visualize age in Washington D.C.
+tm_shape(df_cens) +tm_polygons("age",alpha=.5)
+# Visualize population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("pop_tot",alpha=.5)
+# Visualize black population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("pop_black",alpha=.5)
+# Visualize white population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("pop_white",alpha=.5)
+# Visualize white population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("male",alpha=.5)
+# Visualize white population in Washington D.C.
+tm_shape(df_cens) +tm_polygons("female",alpha=.5)
+
+```
+# Now we need to read in the DC neighborhood data
+
+```{r}
+neigh=st_read("~/CollegeStuff/SeniorYear/Fall2021/DS241/BikeProject/data/raw/DC_Health_Planning_Neighborhoods.geojson") %>% clean_names()
+class(neigh)
+```
+# Now reading in the COVID 19 DC data
+
+```{r message=FALSE, warning=FALSE}
+df_c=readxl::read_excel("~/CollegeStuff/SeniorYear/Fall2021/DS241/BikeProject/data/raw/neigh_cases.xlsx",
+                            col_types = c("date", "text", "numeric")) %>% 
+  clean_names() 
+df_cases=df_c %>%
+  filter(as_date(date) == "2021-11-17") %>% 
+  separate(neighborhood,into=c("code","name"),sep = ":") #%>%
+  #mutate(code=case_when(
+    #code=="N35" ~"N0",
+    #TRUE ~ code
+  #))
+```
+
+## Regular joining of dataframes
+
+```{r}
+neigh2=left_join(neigh,df_cases,by=c("code")) 
+tmap_mode("view")
+tm_shape(neigh2) +tm_polygons("total_positives",alpha=.5)
+```
+```{r}
+  tm_shape(neigh2) +tm_borders(col="blue",lwd=5,alpha=.2)+
+  tm_shape(df_cens) +tm_borders(col="red",lwd=1,alpha=.3)
+```
+
+```{r}
+#df_j=st_join(df_cens,neigh2,prepared=FALSE)
+```
+
+```{r}
+df_cens_adj=df_cens %>% st_transform(4326)
+```
+
+```{r}
+df_j=st_join(df_cens_adj,neigh2,largest=TRUE)
+```
+
+Since we want the geometry for the NEIGHBORHOODS, we need a different work a little harder:
+
+Age not correct!!
+
+```{r}
+df1=df_j %>% select(median_inc, pop_tot, pop_black, pop_white, age, male, female, objectid) %>%
+  group_by(objectid) %>%
+  summarise(pop_n=sum(pop_tot),
+            pop_black_n=sum(pop_black),
+            pop_white_n=sum(pop_white),
+            male_n=sum(male),
+            female_n=sum(female),
+            age_n=sum(age)/n(),
+            adj_median_income=sum(pop_tot*median_inc)/pop_n)
+            
+plot(df1)
+```
+# DOESNT WORK
+# Join demographic data with covid data
+```{r}
+df2 = st_join(df1,neigh2)
+```
+Lets see the data:
+```{r}
+df3=df2 %>% select(pop_tot, pop_black, pop_white, age, male, female, objectid, total_positives) %>%
+  group_by(objectid) %>%
+  summarise(pop_n=sum(pop_tot),
+            pop_black_n=sum(pop_black),
+            pop_white_n=sum(pop_white),
+            male_n=sum(male),
+            female_n=sum(female),
+            age_n=sum(age)/n(),
+            #adj_median_income=sum(pop_tot*median_inc)/pop_n,
+            tot_pos_m=sum(total_positives)/total_postives)
+            
+plot(df3)
+```
+
