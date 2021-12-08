@@ -5,18 +5,22 @@ output: html_notebook
 
 ```{r}
 library(devtools)
-install.packages("sf")
 library(tidyverse)
 library(sf)
 library(tidycensus)
+library(tmap)
+library(censusr)
 ```
 
 
 Load shapefile
 
 ```{r}
-shp_file <- st_read(
-  "crime_incidents_in_2021/Crime_Incidents_in_2021.shp")
+neigh <- st_read(
+  "Crime_Incidents_in_2018.geojson")
+
+neigh2 <- st_read(
+  "Crime_Incidents_in_2021/Crime_Incidents_in_2021.shp")
 ```
 
 Get census variables for 2018.
@@ -33,5 +37,40 @@ df_census = get_acs(geography="tract",
                                 "pop" = "B01001_001",
                                 "pop_black" = "B02009_001"),
                     state="DC", geometry=TRUE, year=2018)
+```
+```{r}
+# Extract census tracks from geoid
+# https://gis.stackexchange.com/questions/316525/tiger-line-geoid-census-tract-map-to-lat-long
+get_tract = function(x) {
+  x = substr(x, 6, nchar(x))
+  x = sub("^0+", "", x)
+  return(x)
+}
+
+y = get_tract('11001008001')
+
+df_census = df_census %>%
+  rowwise() %>%
+  mutate(tract = get_tract(toString(GEOID)))
+
+neigh = neigh %>%
+  rowwise() %>%
+  mutate(CENSUS_TRACT = sub("^0+", "", CENSUS_TRACT)) %>%
+  rename(tract = CENSUS_TRACT)
+```
+
+```{r}
+df_j = inner_join(df_census, neigh, by="tract")
+```
+
+
+```{r}
+df_cens=df_cencus %>% select(-moe) %>% spread(variable,estimate) 
+tm_shape(df_cens) +tm_polygons("median_inc",alpha=.5)
+```
+
+```{r}
+  tm_shape(neigh) +tm_borders(col="blue",lwd=5,alpha=.2)+
+  tm_shape(df_cens) +tm_borders(col="red",lwd=1,alpha=.3)
 ```
 
