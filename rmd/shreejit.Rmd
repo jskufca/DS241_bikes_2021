@@ -7,13 +7,27 @@ output: html_document
 
 ### Loading Packages
 
+The following packages are used: 
+
+tidyverse: mutate data
+readr: Read csv, xlxs from local computer or web
+lubridate: manipulate dates
+janitor: clean names
+ggplot2: create visualizations
+sf: load kml files
+tmap: mapping tools
+tidycensus:extract available census data
+
 ```{r setup, include=FALSE}
-library(knitr)
 library(tidyverse)
 library(readr)
 library(lubridate)
 library(janitor)
+library(ggplot2)
 library(here)
+library(sf) # working with simple features - geospatial
+library(tmap)
+library(tidycensus)
 ```
 
 ### Data
@@ -22,6 +36,14 @@ The data was received from https://opendata.dc.gov/search?collection=Dataset&q=c
 
 ```{r, include = FALSE}
 data <- read.csv("https://raw.githubusercontent.com/jskufca/DS241_bikes_2021/shreejit/data/crime_data/crime_processed/final.csv")
+```
+
+```{r}
+census_geo = st_read(here("data","crime_data", "crime_raw", "Census_Tracts_in_2020.geojson")) %>% clean_names()
+crime = st_read(here("data","crime_data", "crime_raw", "crime_2018.geojson")) %>% clean_names()
+class(crime)
+plot(crime)
+plot(census_geo)
 ```
 
 ### Prepping Data
@@ -78,11 +100,14 @@ ggplot(main, aes(fct_infreq(shift))) +
   geom_bar() +
   labs(
     x="Time of Day",
-    y="Number of Crimes Reported")+
+    y="Number of Crimes Reported",
+    title="Cases count by time of day (since 2017)")+
   theme(legend.position = "none")
 ```
 
 #### Crimes by Hour
+
+The following `ggplot` code shows us a agraph with total crimes happened in each hour since 2017.
 
 ```{r}
 ggplot(main, aes(hour(report_date)), fill=shift) +
@@ -90,7 +115,7 @@ ggplot(main, aes(hour(report_date)), fill=shift) +
   labs(
     x="Hour of the Day",
     y="Number of Crimes Reported",
-    title="Crimes by Hour")+
+    title="Crimes by Hour (since 2017)")+
   theme(legend.position = "none")
 ```
 
