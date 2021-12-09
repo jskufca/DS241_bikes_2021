@@ -27,8 +27,9 @@ library(janitor)
 ```
 
 ```{r}
-neighborhoods_shape <- st_read("DC_Health_Planning_Neighborhoods") %>%
-plot() 
+neigh=st_read(here("data","raw","dc_neigh.geojson")) %>% clean_names()
+class(neigh) 
+plot(neigh) 
 ```
 
 
