@@ -2,6 +2,7 @@
 title: "R Notebook"
 output: html_notebook
 ---
+<<<<<<< HEAD
 
 ```{r}
 library('RSelenium')
@@ -20,5 +21,20 @@ remDr$navigate("https://www.google.com/")
 
 ```{r}
 remDr$close()
+=======
+```{r}
+install.packages(c("httr", "jsonlite"))
+```
+
+```{r}
+library(httr)
+library(jsonlite)
+```
+
+```{r}
+res = GET("https://maps2.dcgis.dc.gov/dcgis/rest/services/FEEDS/MPD/MapServer/2/query?where=1%3D1&outFields=*&outSR=4326&f=json", 
+          query = list(SHIFT = 'EVENING | DAY| MIDNIGHT', REPORT_DATE > ))
+data = fromJSON(rawToChar(res$content))
+>>>>>>> dae3b2f0e927f13045d90fd03a3ea04645734bf7
 ```
 
