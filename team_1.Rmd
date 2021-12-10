@@ -1,0 +1,177 @@
+---
+title: "Team 1 Mapping-Final Product"
+author: "Jackie, Mark, Jackson"
+date: "11/5/2021"
+output: html_notebook
+---
+
+##Load Libraries
+
+Here we loaded a few libraries we will be needing
+```{r eval = FALSE, message = FALSE}
+library(tidyverse) 
+library(dsbox) 
+library(lubridate)
+library(janitor)
+library(readr)
+library(sf)
+library(tmap)
+library(here)
+```
+
+##SF File Work, Analysis for September 1
+Our goal is to join up the bikeshare data with neighborhood data
+
+first we need to load bikeshare data
+```{r load_bikeshare}
+#for laptop 
+df1 <- sf::read_sf("C:/Users/markf/Downloads/DS 241/DS241_bikes_2021/202109-capitalbikeshare-tripdata.csv") %>% clean_names
+#for class
+#df1 <- sf::read_sf("U:/Data Science 241/202109-capitalbikeshare-tripdata.csv") %>% clean_names
+# universal
+neigh=st_read(here("data","raw","dc_neigh.geojson")) %>% clean_names()
+class(neigh) 
+```
+
+Here we need to get the data frame in a format we can use, and select only bikes taken out and returned on September 1 for this example. We will repeat the analysis with other days as well.
+```{r manipulate_data_sep1}
+df1a_sep1 = df1 %>% 
+  select(rideable_type, start = started_at, end = ended_at, start_station_name:end_lng) %>%
+  pivot_longer(cols =  start:end,  names_to = "type", values_to = "time")%>%
+  arrange(time) %>%
+  mutate(inc = case_when(
+    type == "start" ~ 1,
+    type == "end" ~ -1
+  ), riders = cumsum(inc)) %>%
+  mutate(day_of_year = yday(time)) %>%
+  mutate(day_since_sep1 = day_of_year-243) %>%
+  filter(day_since_sep1 == 1)
+```
+
+Here we need to get a bikeshare data frame which includes only bikes rented out (not returned) on September 1. The location that these bikes were taken out of is transformed into a column with point geometry. The new data frame created is an SF object as well, which will allow us to join it with the neighborhood data frame.
+```{r create_geometry}
+df1a_sep1_start <- df1a_sep1 %>%
+  filter(type == "start") %>%
+  select(!end_lat:end_lng) %>%
+  st_as_sf(coords = c("start_lng", "start_lat"), crs = 4326)
+```
+
+Now we need to load in neighborhood data 
+```{r load_neighborhoods}
+#for laptop 
+sf_neighborhoods_df <- sf::read_sf("C:/Users/markf/Downloads/DS 241/DS241_bikes_2021/DC_Health_Planning_Neighborhoods.geojson")
+#for class
+#sf_neighborhoods_df <- sf::read_sf("U:/Data Science 241/DS241_bikes_2021/DC_Health_Planning_Neighborhoods.geojson")
+```
+
+This is the Join! This assigns which neighborhood each bike was taken out of. Entries with "NA" are most likely bikes taken out at locations not directly within the city.
+The first line commented out in a table join that I did not need to use for this analysis
+```{r spatial_join}
+#df_joined12 = st_join(df1a_start, sf_neighborhoods_df)
+df_joined_sep1 = st_join(sf_neighborhoods_df, df1a_sep1_start)
+```
+
+
+Now I would like to make a table that counts the amount of bikes rented out on September first by neighborhood, and includes a geometry of these neighborhoods for plotting
+```{r rentals_by_neighborhood}
+df_neighborhoods_sep1 <- df_joined_sep1 %>%
+  group_by(OBJECTID) %>% 
+  summarise(count_by_neigh = sum(inc, na.rm = FALSE))
+```
+
+I want to make a plot so that I can see which neighborhoods rented more bikes.
+```{r visualization}
+tmap_mode("view")
+tm_shape(df_neighborhoods_sep1) +tm_polygons("count_by_neigh", alpha=.5)
+```
+
+It appears from the visualization that bikes were rented out the most in the central area of DC. Before proposing predictors, it would be beneficial to repeat this analysis on several different days. I randomly chose to repeat the analysis on September 4, and September 26.
+
+##Analysis for September 4
+```{r manipulate_data_sep4}
+df1a_sep4 = df1 %>% 
+  select(rideable_type, start = started_at, end = ended_at, start_station_name:end_lng) %>%
+  pivot_longer(cols =  start:end,  names_to = "type", values_to = "time")%>%
+  arrange(time) %>%
+  mutate(inc = case_when(
+    type == "start" ~ 1,
+    type == "end" ~ -1
+  ), riders = cumsum(inc)) %>%
+  mutate(day_of_year = yday(time)) %>%
+  mutate(day_since_sep1 = day_of_year-243) %>%
+  filter(day_since_sep1 == 4)
+```
+
+```{r create_geometry_sep4}
+df1a_sep4_start <- df1a_sep4 %>%
+  filter(type == "start") %>%
+  select(!end_lat:end_lng) %>%
+  st_as_sf(coords = c("start_lng", "start_lat"), crs = 4326)
+```
+
+```{r spatial_join_sep4}
+df_joined_sep4 = st_join(sf_neighborhoods_df, df1a_sep4_start)
+```
+
+```{r rentals_by_neighborhood_sep4}
+df_neighborhoods_sep4 <- df_joined_sep4 %>%
+  group_by(OBJECTID) %>% 
+  summarise(count_by_neigh = sum(inc, na.rm = FALSE))
+```
+
+```{r visualization_sep4}
+tmap_mode("view")
+tm_shape(df_neighborhoods_sep4) +tm_polygons("count_by_neigh", alpha=.5)
+```
+
+The results for September 4 were similar, we will check again on one last day, September 26
+
+##Analysis for September 26
+```{r manipulate_data_sep26}
+df1a_sep26 = df1 %>% 
+  select(rideable_type, start = started_at, end = ended_at, start_station_name:end_lng) %>%
+  pivot_longer(cols =  start:end,  names_to = "type", values_to = "time")%>%
+  arrange(time) %>%
+  mutate(inc = case_when(
+    type == "start" ~ 1,
+    type == "end" ~ -1
+  ), riders = cumsum(inc)) %>%
+  mutate(day_of_year = yday(time)) %>%
+  mutate(day_since_sep1 = day_of_year-243) %>%
+  filter(day_since_sep1 == 26)
+```
+
+```{r create_geometry_sep26}
+df1a_sep26_start <- df1a_sep26 %>%
+  filter(type == "start") %>%
+  select(!end_lat:end_lng) %>%
+  st_as_sf(coords = c("start_lng", "start_lat"), crs = 4326)
+```
+
+```{r spatial_join_sep26}
+df_joined_sep26 = st_join(sf_neighborhoods_df, df1a_sep26_start)
+```
+
+```{r rentals_by_neighborhood_sep26}
+df_neighborhoods_sep26 <- df_joined_sep26 %>%
+  group_by(OBJECTID) %>% 
+  summarise(count_by_neigh = sum(inc, na.rm = FALSE))
+```
+
+```{r visualization_sep26}
+tmap_mode("view")
+tm_shape(df_neighborhoods_sep26) +tm_polygons("count_by_neigh", alpha=.5)
+```
+
+##Analysis
+Our data and visualizations show that the most bike rentals happen in the geographic location of the downtown DC neighborhoods, and less so in the residential neighborhoods. 
+This gives me reason to believe that people coming into work use bikes instead of public transport for that "last mile" to work. I believe that because of this, bikes may be being used as an alternative to public transport.
+Therefor, one predictor that could come from the dataset is that if the number of bike rentals for a given day/week/period is high, Covid cases would be lower because people would be using bikes instead of public transport.
+
+This is the Join! This assigns which neighborhood each bike was taken out of. Entries with "NA" are most likely bikes taken out at locations not directly within the city.
+```{r}
+df_joined = st_join(df1a_start, sf_neighborhoods_df)
+view(df_joined)
+```
+
+
