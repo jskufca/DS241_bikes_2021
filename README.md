@@ -1,7 +1,4 @@
-# DS241_bikes_2021
-
-*NOTE*: I(Mark) would highly recommend only using the team 1 mappings-cleaned.Rmd
-
+DS241_bikes_2021
 Bikeshare and demographics analysis F2021
 
 The whole class will be "owners" of this repository, though we will manage carefully.
@@ -19,3 +16,5 @@ Hello, this is Jackie.
 Hello, this is Jordan.
 
 Hello, this is Griffin.
+
+Hello, this is Jackson :)

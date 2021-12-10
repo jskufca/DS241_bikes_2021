@@ -1,6 +1,6 @@
 # DS241_bikes_2021
 
-*NOTE*: I(Mark) would highly recommend only using the team 1 mappings-cleaned.Rmd
+*NOTE*: I(Mark) would highly recommend only using the team 1 mappings-final product.Rmd
 
 Bikeshare and demographics analysis F2021
 
