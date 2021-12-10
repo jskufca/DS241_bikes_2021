@@ -1,0 +1,36 @@
+---
+title: "Crime Data Analysis"
+output: html_notebook
+---
+
+```{r}
+library(devtools)
+library(tidyverse)
+library(sf)
+library(tidycensus)
+library(tmap)
+library(censusr)
+library(here)
+library(janitor)
+```
+
+```{r}
+crime <- st_read(
+  here("data", "raw","Crime_Incidents_in_2021.geojson")) %>% clean_names()
+
+neigh = st_read(
+  here("data", "raw","dc_neigh.geojson")) %>% clean_names()
+```
+
+```{r}
+df = st_join(crime, neigh)
+```
+
+```{r}
+tmap_mode("view")
+
+tm_shape(neigh) + tm_polygons("shapearea") +
+  tm_shape(crime) + tm_dots()
+```
+
+
