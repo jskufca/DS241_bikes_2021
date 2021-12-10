@@ -1,9 +1,17 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: 'Group 2: Bikeshare Data'
+output:
+  html_document:
+    df_print: paged
 ---
 
-```{r}
+```{r, echo=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+We make use of the following packages.
+
+```{r, message = FALSE}
 library(readr)
 library(sf)
 library(tmap)
@@ -12,16 +20,15 @@ library(dplyr)
 library(here)
 library(janitor)
 library(lubridate)
-library(tidycensus)
 library(ggmap)
 ```
 
-GOAL: Compute a dataframe with bike stations, rides from that station during the month, and the neighborhood that station is in.
+GOAL: Compute a dataframe with neighborhoods and riders from each of them, over the course of September 2021.
 
 
-Download the capitalshare file from their website. You should only have to do this once, and only if the data is not already there. Although, running again is not bad.
+Download the capitalshare file from their [website](https://www.capitalbikeshare.com/system-data). You should only have to do this once, and only if the data is not already there. Although, running again is not bad.
 
-```{r}
+```{r, message=FALSE}
 url <- "https://s3.amazonaws.com/capitalbikeshare-data/202109-capitalbikeshare-tripdata.zip"
 
 download.file(url, destfile = here("data", "raw", "capitalshare.csv.zip"), mode = "wb")
@@ -30,7 +37,7 @@ unzip(here("data", "raw", "capitalshare.csv.zip"), exdir = here("data", "raw"))
 
 Read in the capitalshare data.
 
-```{r}
+```{r, message=FALSE}
 capitalshare <- read_csv(here("data", "raw", "202109-capitalbikeshare-tripdata.csv"), show_col_types = FALSE)
 
 stations <- capitalshare %>%
@@ -38,9 +45,9 @@ stations <- capitalshare %>%
   distinct(start_station_name, .keep_all=TRUE)
 ```
 
-Read in geojson file from the dc-health-planning-neighborhoods open dc page, and do some cleaning.
+Read in geojson file from the [DC Health Planning Neighborhoods](https://opendata.dc.gov/datasets/dc-health-planning-neighborhoods/explore?location=38.890598%2C-77.022347%2C12.61) data set from OpenDC, and do some cleaning.
 
-```{r}
+```{r, message=FALSE}
 neigh = st_read(here("data", "raw", "dc_neigh.geojson")) %>% 
   clean_names() %>%
   separate(name, into=c("code","neigh")) %>%
@@ -48,17 +55,21 @@ neigh = st_read(here("data", "raw", "dc_neigh.geojson")) %>%
     code=="N35" ~"N0",
     TRUE ~ code
   )) %>%
+  # remove the following columns as we don't need them
   select(-c(gis_id, shapearea, shapelen, neigh)) %>%
   rename(neigh = dc_hpn_name)
 ```
 
-Compute riders per station (summarized across the month), and by member status (casual or member of capitalshare).
+Compute riders per station (summarized across the month) and by member status (casual or member of capitalshare).
 
-```{r}
+```{r, message=FALSE}
 riders_day <- capitalshare %>%
+  # extract the date only from started_at
   mutate(start_date = date(started_at)) %>%
   group_by(start_date, start_station_name, member_casual) %>%
+  # sum the number of riders
   summarise(riders = n()) %>%
+  # remove any NA values
   drop_na() %>%
   ungroup()
 
@@ -93,25 +104,36 @@ neigh_stats <- stations_neigh %>%
   rename( station = start_station_name) 
 ```
 
-Summarizing by neighborhood to get each one only once in the data frame.
+We only want each neighborhood listed once (not twice), so we create new columns for each membership type (casual or member). 
 
-```{r}
-df <- neigh_stats %>%
+```{r, message=FALSE}
+rides_with_member <- neigh_stats %>%
   group_by(neigh, member_casual) %>%
   summarise(tot_riders = sum(riders))
 
-df2 <- df %>%
+final_df <- rides_with_member %>%
+  # sum the riders based on casual or member
   mutate(
     riders_casual = case_when(member_casual == "casual" ~ tot_riders),
     riders_member = case_when(member_casual == "member" ~ tot_riders)
   ) %>%
+  # now, condense the data frame vertically.
   group_by(neigh) %>%
-  summarise(riders_casual = sum(riders_casual, na.rm = TRUE), riders_member = sum(riders_member, na.rm = TRUE)) %>%
+  summarise(
+    riders_casual = sum(riders_casual, na.rm = TRUE),
+    riders_member = sum(riders_member, na.rm = TRUE)
+    ) %>%
+  # add a column for total riders
   mutate(
     tot_riders = riders_casual + riders_member
   )
 ```
 
+Let's check the result.
+
+```{r}
+head(final_df)
+```
 
 
 
