@@ -1,0 +1,38 @@
+---
+title: "crimes and neighborhoods"
+output: html_document
+---
+The purpose of this document is to combine neighborhood data with crime data
+
+##Load Packages
+For our analysis, we will use the following packages for data wrangling and visualizations:
+devtools for R package development
+tidyverse for data wrangling and visualization
+sf to convert coordinates into geometrical points
+tidycensus to get Census data that is pre-prepared for exploration within the tidyverse
+tmap to visualize spatial data distributions by creating geographical maps by variables
+censusr to retrieve data frames of census data and metadata from U.S. Census Beureau
+here to specify where files/data is in the computer relative to a particular file
+janitor for examining and cleaning untidy data
+lubridate package for handling dates
+
+```{r}
+library(devtools)
+library(tidyverse)
+library(sf)
+library(tidycensus)
+library(tmap)
+library(censusr)
+library(here)
+library(janitor)
+library(lubridate)
+```
+
+## Load data
+The crime data comes from Open Data D.C. he data can be downloaded in .csv, .geojson and various other formats. The data is available at https://opendata.dc.gov/datasets/DCGIS::crime-incidents-in-2021/about.
+```{r}
+data<-read_csv("") %>%
+  clean_names() %>%
+  st_as_sf(coords = c("longitude","latitude"), crs = 4326)
+```
+
