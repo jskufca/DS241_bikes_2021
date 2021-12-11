@@ -2,17 +2,133 @@
 title: "Brennas file"
 output: html_notebook
 ---
-apple
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+https://github.com/jskufca/DS241_bikes_2021
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+Taken from https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html
 
+##Hello world
 ```{r}
-plot(cars)
+library(tmap)
+data("World")
+
+tm_shape(World) +
+    tm_polygons("HPI")
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+The object World is a spatial object of class sf from the sf package; it is a data.frame with a special column that contains a geometry for each row, in this case polygons. In order to plot it in tmap, you first need to specify it with tm_shape. Layers can be added with the + operator, in this case tm_polygons. There are many layer functions in tmap, which can easily be found in the documentation by their tm_ prefix. See also ?'tmap-element'.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+##Interactive Maps
+Each map can be plotted as a static image or viewed interactively using "plot" and "view" modes, respectively. The mode can be set with the function tmap_mode, and toggling between the modes can be done with the ‘switch’ ttm() (which stands for toggle thematic map.
+```{r}
+tmap_mode("view")
+
+tm_shape(World) +
+    tm_polygons("HPI")
+```
+
+##Multiple shapes and layers
+A shape is a spatial object (with a class from sf, sp, stars, or raster). Multiple shapes and also multiple layers per shape can be plotted:
+```{r}
+data(World, metro, rivers, land)
+
+tmap_mode("plot")
+## tmap mode set to plotting
+tm_shape(land) +
+    tm_raster("elevation", palette = terrain.colors(10)) +
+tm_shape(World) +
+    tm_borders("white", lwd = .5) +
+    tm_text("iso_a3", size = "AREA") +
+tm_shape(metro) +
+    tm_symbols(col = "red", size = "pop2020", scale = .5) +
+tm_legend(show = FALSE)
+```
+
+## Facets
+Facets can be created in three ways:
+
+1. By assigning multiple variable names to one aesthetic (in this example the first argument of tm_polygons:
+```{r}
+tmap_mode("view")
+tm_shape(World) +
+    tm_polygons(c("HPI", "economy")) +
+    tm_facets(sync = TRUE, ncol = 2)
+```
+
+2. By splitting the spatial data with the by argument of tm_facets:
+```{r}
+tmap_mode("plot")
+## tmap mode set to plotting
+
+data(NLD_muni)
+
+NLD_muni$perc_men <- NLD_muni$pop_men / NLD_muni$population * 100
+
+tm_shape(NLD_muni) +
+    tm_polygons("perc_men", palette = "RdYlBu") +
+    tm_facets(by = "province")
+```
+
+3. By using the tmap_arrange function:
+```{r}
+tmap_mode("plot")
+## tmap mode set to plotting
+
+data(NLD_muni)
+tm1 <- tm_shape(NLD_muni) + tm_polygons("population", convert2density = TRUE)
+tm2 <- tm_shape(NLD_muni) + tm_bubbles(size = "population")
+
+tmap_arrange(tm1, tm2)
+## Legend labels were too wide. Therefore, legend.text.size has been set to 0.27. Increase legend.width (argument of tm_layout) to make the legend wider and therefore the labels larger.
+## The legend is too narrow to place all symbol sizes.
+```
+##Basemaps and overlay tile maps
+Tiled basemaps can be added with the layer function tm_basemap. Semi-transparent overlay maps (for example annotation labels) can be added with tm_tiles.
+```{r}
+tmap_mode("view")
+tm_basemap("Stamen.Watercolor") +
+tm_shape(metro) + tm_bubbles(size = "pop2020", col = "red") +
+tm_tiles("Stamen.TonerLabels")
+```
+
+##Options and styles
+The functions tm_layout and tm_view are used to specify the map layout and the interactive aspects respectively. These functions can be used in the same way as the layer functions, e.g.
+```{r}
+tmap_mode("plot")
+## tmap mode set to plotting
+
+tm_shape(World) +
+    tm_polygons("HPI") +
+tm_layout(bg.color = "skyblue", inner.margins = c(0, .02, .02, .02))
+```
+
+These options, as well as a couple of others, can also be set within with tmap_options, which works in the same way as the base R function options. The main advantage is that these options are set globally, so they do not have to be specified in each map, for the duration of the session
+
+```{r}
+tmap_options(bg.color = "black", legend.text.color = "white")
+
+tm_shape(World) +
+    tm_polygons("HPI", legend.title = "Happy Planet Index")
+```
+
+A style is a certain configuration of the tmap options
+
+```{r}
+
+tmap_style("classic")
+## tmap style set to "classic"
+## other available styles are: "white", "gray", "natural", "cobalt", "col_blind", "albatross", "beaver", "bw", "watercolor"
+
+tm_shape(World) +
+    tm_polygons("HPI", legend.title = "Happy Planet Index")
+
+```
+```{r}
+# see what options have been changed
+tmap_options_diff()
+
+# reset the options to the default values
+tmap_options_reset()
+
+```
+
