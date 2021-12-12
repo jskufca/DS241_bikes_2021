@@ -8,7 +8,10 @@ output:
 ```{r, echo=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 ```
+### Goal
+Our team goal was to build a dataframe with neighborhoods and riders from each neighborhood, over the course of the month September 2021.
 
+### Initialization
 We make use of the following packages.
 
 ```{r, message = FALSE}
@@ -22,9 +25,6 @@ library(janitor)
 library(lubridate)
 library(ggmap)
 ```
-
-GOAL: Compute a dataframe with neighborhoods and riders from each of them, over the course of September 2021.
-
 
 Download the capitalshare file from their [website](https://www.capitalbikeshare.com/system-data). You should only have to do this once, and only if the data is not already there. Although, running again is not bad.
 
@@ -50,15 +50,16 @@ Read in geojson file from the [DC Health Planning Neighborhoods](https://opendat
 ```{r, message=FALSE}
 neigh = st_read(here("data", "raw", "dc_neigh.geojson")) %>% 
   clean_names() %>%
-  separate(name, into=c("code","neigh")) %>%
+  separate(name, into = c("code", "neigh")) %>%
   mutate(code=case_when(
-    code=="N35" ~"N0",
+    code == "N35" ~ "N0",
     TRUE ~ code
   )) %>%
   # remove the following columns as we don't need them
   select(-c(gis_id, shapearea, shapelen, neigh)) %>%
   rename(neigh = dc_hpn_name)
 ```
+### Data Cleaning
 
 Compute riders per station (summarized across the month) and by member status (casual or member of capitalshare).
 
@@ -84,7 +85,7 @@ Add coordinates of stations by joining.
 riders_day_loc <- left_join(rides_by_station, stations, by = "start_station_name")
 ```
 
-Change to sf format.
+Change to simple features (sf) format. This converts latitude and longitude coordinates to a geometrical format.
 
 ```{r}
 riders_sf <- st_as_sf(riders_day_loc, coords = c("start_lng", "start_lat"), crs = 4326)
@@ -119,6 +120,7 @@ final_df <- rides_with_member %>%
   ) %>%
   # now, condense the data frame vertically.
   group_by(neigh) %>%
+  # the following step removes the NA values in the column by summarizing again and summing the riders.
   summarise(
     riders_casual = sum(riders_casual, na.rm = TRUE),
     riders_member = sum(riders_member, na.rm = TRUE)
@@ -129,12 +131,13 @@ final_df <- rides_with_member %>%
   )
 ```
 
-Let's check the result.
+### Results
+Let's check the result. 
 
 ```{r}
-head(final_df)
+tail(final_df)
 ```
-
+Note that the last row contains NA for the neighborhood. We believe this corresponds to stations that could not be categorized into a neighborhood, which could be a fault in the neighborhood data we have. This is something that should be considered during the analysis step as there could be neighborhoods that are not accurately represented in the data here.
 
 
 QED
