@@ -8,6 +8,8 @@ output:
 ```{r, echo=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 ```
+GOAL: Compute a dataframe with neighborhoods and riders from each of them, over the course of September 2021.
+
 
 We make use of the following packages.
 
@@ -22,9 +24,6 @@ library(janitor)
 library(lubridate)
 library(ggmap)
 ```
-
-GOAL: Compute a dataframe with neighborhoods and riders from each of them, over the course of September 2021.
-
 
 Download the capitalshare file from their [website](https://www.capitalbikeshare.com/system-data). You should only have to do this once, and only if the data is not already there. Although, running again is not bad.
 
