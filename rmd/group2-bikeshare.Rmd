@@ -8,9 +8,10 @@ output:
 ```{r, echo=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 ```
-GOAL: Compute a dataframe with neighborhoods and riders from each of them, over the course of September 2021.
+### Goal
+Our team goal was to build a dataframe with neighborhoods and riders from each neighborhood, over the course of the month September 2021.
 
-
+### Initialization
 We make use of the following packages.
 
 ```{r, message = FALSE}
@@ -58,6 +59,7 @@ neigh = st_read(here("data", "raw", "dc_neigh.geojson")) %>%
   select(-c(gis_id, shapearea, shapelen, neigh)) %>%
   rename(neigh = dc_hpn_name)
 ```
+### Data Cleaning
 
 Compute riders per station (summarized across the month) and by member status (casual or member of capitalshare).
 
