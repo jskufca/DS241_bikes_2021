@@ -49,7 +49,7 @@ df = st_join(crime, neigh)
 
 ### T-map for crimes in neighborhood
 
-The tmap code below has been set to view mode. Each neighborhood has been represented by a a different shade and been filled with the area. The black dots represents any crime that has happened in that particular area.
+The tmap code below has been set to view mode. Each neighborhood has been represented by a a different shade and been filled with the area. The colored dots represents the type of crime that has happened in that particular area.
 
 ```{r}
 tmap_mode("view")
@@ -60,6 +60,33 @@ tm_shape(crime) +
   tm_dots(col="offense", palette = "Set1", stretch.palette = FALSE, size = 0.02, shape = 2) +  
   tm_layout(legend.outside = TRUE) 
 ```
+
+Here is the first 10 rows of a table representing the number of crimes for each neighborhood code. Taking the max we can see that the neighborhood with the code N31 has the most crime reports.
+
+```{r}
+df2 <- df %>%
+count (code)
+df2
+
+max = df2 %>% slice_max(n) %>% slice(1)
+max
+```
+
+Additionally, here is a similar table but taking into account the type of crime committed.
+```{r}
+df3 <- df %>%
+count (code, offense )
+df3
+```
+Also here is a table containing the most prominent crime in each neighborhood and their number of occurrences.
+```{r}
+max = df3 %>%
+  group_by(code)%>%
+  slice_max(n)
+max
+```
+
+From this table you can see that the most common offense in all the neighborhood is theft/other.
 
 ### Making Visualizations from the Data
 
