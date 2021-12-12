@@ -3,6 +3,20 @@ title: "Crime Data Analysis"
 output: html_notebook
 ---
 
+### Load Packages
+
+For our analysis, in addition to the state-wise data package, we will use the following packages for data wrangling and visualization.
+
+- **devtools** for R package development
+- **tidyverse** for data wrangling and visualization
+- **sf** to convert coordinates into geometrical points
+- **tidycensus** to get Census data that is pre-prepared for exploration within the tidyverse
+- **tmap** to visualize spatial data distributions by creating geographical maps by variables
+- **censusr** to retrieve data frames of census data and metadata from U.S. Census Beureau
+- **here** to specify where files/data is in the computer relative to a particular file 
+- **janitor** for examining and cleaning untidy data
+- **lubridate** package for handling dates
+
 ```{r}
 library(devtools)
 library(tidyverse)
@@ -12,9 +26,14 @@ library(tmap)
 library(censusr)
 library(here)
 library(janitor)
+library(lubridate)
 ```
 
-```{r}
+### Load Data
+
+The data comes from a data set posted by Open Data DC from their own website that consists of all the crime data for past years. The data can be downloaded in .csv, .geojson and various other formats. The data is available at ("https://opendata.dc.gov/datasets/crime-incidents-in-2021/explore") and is updated daily.
+
+```{r, include = FALSE}
 crime <- st_read(
   here("data", "raw","Crime_Incidents_in_2021.geojson")) %>% clean_names()
 
@@ -22,15 +41,110 @@ neigh = st_read(
   here("data", "raw","dc_neigh.geojson")) %>% clean_names()
 ```
 
+The datasets for census data and the crime data were joined together using
+
 ```{r}
 df = st_join(crime, neigh)
 ```
 
+### T-map for crimes in neighborhood
+
+The tmap code below has been set to view mode. Each neighborhood has been represented by a a different shade and been filled with the area. The colored dots represents the type of crime that has happened in that particular area.
+
 ```{r}
 tmap_mode("view")
 
-tm_shape(neigh) + tm_polygons("shapearea") +
-  tm_shape(crime) + tm_dots()
+tm_shape(neigh) + 
+  tm_polygons("shapearea") +
+tm_shape(crime) + 
+  tm_dots(col="offense", palette = "Set1", stretch.palette = FALSE, size = 0.02, shape = 2) +  
+  tm_layout(legend.outside = TRUE) 
 ```
 
+Here is the first 10 rows of a table representing the number of crimes for each neighborhood code. Taking the max we can see that the neighborhood with the code N31 has the most crime reports.
 
+```{r}
+df2 <- df %>%
+count (code)
+df2
+
+max = df2 %>% slice_max(n) %>% slice(1)
+max
+```
+
+Additionally, here is a similar table but taking into account the type of crime committed.
+```{r}
+df3 <- df %>%
+count (code, offense )
+df3
+```
+Also here is a table containing the most prominent crime in each neighborhood and their number of occurrences.
+```{r}
+max = df3 %>%
+  group_by(code)%>%
+  slice_max(n)
+max
+```
+
+From this table you can see that the most common offense in all the neighborhood is theft/other.
+
+### Making Visualizations from the Data
+
+The crime data from Open Data DC is from Jan 1, 2021 till Dec 8, 2021. We used some of the variables from the dataset to create plots that could give us certain visualizations about crime happening in DC.
+
+#### Time of the day
+
+The ggplot shows us visualizations for crime by time of day. 
+
+```{r}
+ggplot(crime, aes(fct_infreq(shift))) +
+  geom_bar() +
+  labs(
+    x="Time of Day",
+    y="Number of Crimes Reported")+
+  theme(legend.position = "none")
+```
+
+#### Method
+
+The ggplot shows us visualizations for crime by method.
+
+```{r}
+ggplot(crime, aes(x=fct_infreq(method))) +
+  geom_bar() +
+  labs(
+    x="Method of Crime",
+    y="Number of Crimes Reported",
+    fill="Method") +
+  scale_y_continuous(labels = scales::comma)+
+  theme(legend.position = "none")
+```
+
+#### Offense
+
+`ggplot` code below shows the number of crimes by offense. 
+In the plot below, we see that there are no records for Arson related crimes. However, that is because the crimes related to Arson very less (3) compared to that of Theft/Other (10236).
+
+```{r}
+ggplot(crime, aes(x=fct_infreq(offense), fill=offense)) +
+  geom_bar(stat='count') +
+  labs(
+    x="Criminal Offense",
+    y="Number of Crimes Reported",
+    fill="Offense") +
+    theme(axis.text.x = element_text(angle = 30, hjust=1)) +
+    theme(legend.position = "none")
+```
+
+#### Total Crimes (by month)
+
+* Data for December is incomplete.
+
+```{r}
+ggplot(crime, aes(factor(month(report_dat, label=TRUE)))) +
+  geom_bar() +
+  labs(
+    x="Year",
+    y="Number of Crimes Reported") +
+    theme(legend.position = "none")
+```
