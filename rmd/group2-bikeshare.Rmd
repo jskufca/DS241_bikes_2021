@@ -135,7 +135,7 @@ final_df <- rides_with_member %>%
 Let's check the result. 
 
 ```{r}
-head(final_df)
+tail(final_df)
 ```
 Note that the last row contains NA for the neighborhood. We believe this corresponds to stations that could not be categorized into a neighborhood, which could be a fault in the neighborhood data we have. This is something that should be considered during the analysis step as there could be neighborhoods that are not accurately represented in the data here.
 
