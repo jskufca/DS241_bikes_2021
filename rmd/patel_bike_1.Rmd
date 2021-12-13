@@ -2,7 +2,7 @@
 title: "Demographic DC tidycensus data analysis"
 author: "Tarak Patel"
 output:
-  html_document:
+  html_notebook:
     df_print: paged
 ---
 ## Install and load packages
