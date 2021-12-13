@@ -1,7 +1,9 @@
 ---
 title: "Demographic DC tidycensus data analysis"
 author: "Tarak Patel"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 ## Install and load packages
 Load required packages for the specific analysis.
@@ -22,8 +24,7 @@ Going to need an API key to access the data. We can acquire a key from the follo
 census_api_key("ef8a7b63162e3c4881110f495943872be80639fd", overwrite=TRUE)
 ```
 
-Required Census codes for demographic variables. Selection is based on most popular demographic values:
-Age; Gender; Ethnicity; Income; Level of education; Religion; Occupation; Family structure
+Required Census codes for demographic variables. Selection is based on the most popular demographic values: Age, Gender, Ethnicity, Income
 
 - **B01002_001**    DC Age Distribution
 - **B01001_002**    Sex (M)
@@ -35,10 +36,10 @@ Age; Gender; Ethnicity; Income; Level of education; Religion; Occupation; Family
 
 
 ```{r}
-v20 <- load_variables(2018, "acs5", cache = TRUE)
+cens_vars <- load_variables(2018, "acs5", cache = TRUE)
 ```
 
-## Getting 2018 DC Census Data
+## Getting together the 2018 DC Census Data
 
 ```{r}
 df_census <- get_acs(geography = "tract",                  
@@ -52,12 +53,14 @@ df_census <- get_acs(geography = "tract",
                   state="DC",geometry=TRUE,year=2018) %>%
   clean_names()
 ```
+Now we should classify and plot the data frame we just created
+
 ```{r}
 class(df_census)
 plot(df_census)
 ```
 
-Now we should clean the census data set and add percentages for population and sex variables.
+Now we should clean the census data frame and add percentages for population and sex variables.
 
 ```{r}
 df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
@@ -65,43 +68,41 @@ df_cens=df_census %>% select(-moe) %>% spread(variable,estimate) %>%
          pop_white_pct=pop_white/pop_tot, 
          male_pct=male/pop_tot,
          female_pct=female/pop_tot)
-tm_shape(df_cens) + tm_polygons("median_inc",alpha=0.5)
 ```
-
-
 
 
 Visualize demographic outcome in maps.
 ```{r}
-# Visualize median income in Washington D.C.
+# Visualize median income distribution in Washington D.C.
 tm_shape(df_cens) +tm_polygons("median_inc",alpha=.5)
-# Visualize age in Washington D.C.
+# Visualize age distribution in Washington D.C.
 tm_shape(df_cens) +tm_polygons("age",alpha=.5)
-# Visualize population in Washington D.C.
+# Visualize population distribution in Washington D.C.
 tm_shape(df_cens) +tm_polygons("pop_tot",alpha=.5)
-# Visualize black population in Washington D.C.
+# Visualize black population distribution in Washington D.C.
 tm_shape(df_cens) +tm_polygons("pop_black",alpha=.5)
-# Visualize white population in Washington D.C.
+# Visualize white population distribution in Washington D.C.
 tm_shape(df_cens) +tm_polygons("pop_white",alpha=.5)
-# Visualize white population in Washington D.C.
+# Visualize male population distribution in Washington D.C.
 tm_shape(df_cens) +tm_polygons("male",alpha=.5)
-# Visualize white population in Washington D.C.
+# Visualize female distribution in Washington D.C.
 tm_shape(df_cens) +tm_polygons("female",alpha=.5)
 ```
 
-# Now we need to read in the DC neighborhood data
+# Now we need to read in and classify the DC neighborhood data
 
 ```{r}
-neigh=st_read("~/CollegeStuff/SeniorYear/Fall2021/DS241/BikeProject/data/raw/DC_Health_Planning_Neighborhoods.geojson") %>% clean_names()
+neigh=st_read(here("data", "raw", "DC_Health_Planning_Neighborhoods.geojson")) %>% clean_names()
 class(neigh)
-plot(neigh)
 ```
 # Now reading in the COVID 19 DC data
 
 ```{r message=FALSE, warning=FALSE}
-df_c=readxl::read_excel("~/CollegeStuff/SeniorYear/Fall2021/DS241/BikeProject/data/raw/neigh_cases.xlsx",
+df_c=readxl::read_excel(here("data","raw","neigh_cases.xlsx"),
                             col_types = c("date", "text", "numeric")) %>% 
-  clean_names() 
+  clean_names()
+
+# We should filter the data so we can better analyze it
 df_cases=df_c %>%
   filter(as_date(date) == "2021-11-17") %>% 
   separate(neighborhood,into=c("code","name"),sep = ":") %>%
@@ -111,12 +112,14 @@ df_cases=df_c %>%
   ))
 ```
 
-## Regular joining of dataframes
+## Now we progress to joining these data frames to accompish the project task
 
 ```{r}
+# Need to join neighborhood data with covid case data
 neigh2=left_join(neigh,df_cases,by=c("code")) 
 tmap_mode("view")
-tm_shape(neigh2) +tm_polygons("total_positives",alpha=.5)
+# Create map of total positive covid cases in DC
+tm_shape(neigh2) +tm_polygons("total_positives", alpha=.5)
 ```
 ```{r}
   tm_shape(neigh2) +tm_borders(col="blue",lwd=5,alpha=.2)+
@@ -135,12 +138,8 @@ df_cens_adj=df_cens %>% st_transform(4326)
 df_j=st_join(df_cens_adj,neigh2,largest=TRUE)
 ```
 
-Since we want the geometry for the NEIGHBORHOODS, we need a different work a little harder:
-
-Age not correct!!
-
 ```{r}
-df1=df_j %>% select(median_inc, pop_tot, pop_black, pop_white, age, male, female, objectid) %>%
+df_final=df_j %>% select(median_inc, pop_tot, pop_black, pop_white, age, male, female, total_positives, objectid) %>%
   group_by(objectid) %>%
   summarise(pop_n=sum(pop_tot),
             pop_black_n=sum(pop_black),
@@ -148,22 +147,9 @@ df1=df_j %>% select(median_inc, pop_tot, pop_black, pop_white, age, male, female
             male_n=sum(male),
             female_n=sum(female),
             age_n=sum(age)/n(),
-            adj_median_income=sum(pop_tot*median_inc)/pop_n)
+            adj_median_income=sum(pop_tot*median_inc)/pop_n,
+            tot_positives_n = sum(total_positives)/n())
             
-plot(df1)
+plot(df_final)
+tm_shape(df_final)+tm_polygons(c("adj_median_income","tot_positives_n", "pop_black_n", "pop_white_n"))
 ```
-
-# Join demographic data with covid data
-```{r}
-df2 = left_join(neigh2,df1 %>% st_set_geometry(NULL)) %>% 
-  mutate(blk_perc = pop_black_n/pop_n,
-         covid_rate = total_positives/pop_n,
-         wht_perc = pop_white_n/pop_n)
-tm_shape(df2)+tm_polygons(c("adj_median_income","covid_rate","blk_perc","wht_perc"))
-
-```
-
-```{r}
-#df2 %>% filter(objectid!=35) %>% tm_shape()+tm_polygons(c("adj_median_income","covid_rate","black_perc","wht_perc"),alpha=.4)
-```
-
