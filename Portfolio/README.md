@@ -15,3 +15,5 @@ Visualizing data using ggplot2 (scatterplot, histogram, barchart, lineplot).
 Manipulate data (demonstrate dplyr verbs   filter, summarise, join, select, rename, slice).
 Data loading and tidying and cleaning (to include    pivot-wider   and pivot-longer).
 Data science process (major steps).
+
+Rodrigo Vecino
