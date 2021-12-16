@@ -1,0 +1,165 @@
+---
+title: "Comparing Covid Tests and Covid Positives using mapping data"
+output: html_notebook
+---
+
+Through mapping both covid tests and positives adjusted for population, we hope to fine if any relation between the two exists. It may be possible that more tests mean more covid.
+
+### Load packages
+
+The following packages are used:
+
+knitr-- load datasets
+
+tidverse-- mutate data
+
+janitor-- clean names
+
+lubridate -- work with dates
+
+here-- give file locations
+
+```{r}
+library(knitr)
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(here)
+```
+
+
+### Additional packages being used
+
+tmap-- for mapping purposes
+
+sf-- joining spacial data and generating plots
+
+tidycensus-- loading census data
+
+```{r message=FALSE, warning=FALSE}
+library(tmap)
+library(sf)
+library(tidycensus)
+```
+
+### Load testing data
+
+The test data is loaded into R, and mutated to become non-cumulative
+
+```{r message=FALSE, warning=FALSE}
+df1=readxl::read_excel(here("data","raw","tot_tests_neighborhood.xlsx")) %>% 
+  clean_names() %>%
+  #mutate(date_reported= as_datetime(date_reported))
+  separate(date_reported,into=c("date","hr"),sep = " ")%>%
+  mutate(date_report=as_date(date))%>%
+  group_by(neighborhood)%>%
+  mutate(across(total_tests, ~ .-c(0,lag(.)[-1])))
+```
+
+
+### Load Mapping Data
+
+Loads in the Health neighbourhood geojson file.
+
+```{r message=FALSE, warning=FALSE}
+neigh=st_read(here("data","raw","dc_neigh.geojson")) %>% clean_names()
+class(neigh)
+```
+
+### Select and clean data
+
+Cleans testing data so it can be joined with the health neighborhood spacial data
+
+```{r}
+df_tests=df1 %>%
+  filter(as_date(date_report) == "2021/10/27") %>% 
+  separate(neighborhood,into=c("code","name"),sep = ":") %>% 
+  mutate(code=case_when(
+    code=="N35" ~"N0",
+    TRUE ~ code
+  ))
+```
+
+### Join mapping data with test data
+
+Joins data and generates plot
+
+```{r message=FALSE, warning=FALSE}
+neigh2=left_join(neigh,df_tests,by=c("code")) 
+tmap_mode("view")
+tm_shape(neigh2) +tm_polygons("total_tests",alpha=.5)
+```
+
+### Load positive cases data
+
+Reads in positive coivd cases data and cleans it so it can be joined to the above datasets
+
+```{r message=FALSE, warning=FALSE}
+df_c=readxl::read_excel(here("data","raw","neigh_cases.xlsx"),
+                            col_types = c("date", "text", "numeric")) %>% 
+  clean_names() 
+df_cases=df_c %>%
+  filter(as_date(date) == "2021/10/27") %>% 
+  separate(neighborhood,into=c("code","name"),sep = ":") %>%
+  mutate(code=case_when(
+    code=="N35" ~"N0",
+    TRUE ~ code
+  ))
+```
+
+### Join covid data
+
+```{r}
+neigh3=left_join(neigh2,df_cases,by=c("code")) 
+tmap_mode("view")
+tm_shape(neigh3) +tm_polygons("total_positives",alpha=.5)
+```
+
+### Graph data
+
+```{r}
+ tm_shape(neigh3)+tm_polygons(c("total_positives","total_tests"),alpha=.5)
+```
+
+### Get census Data
+
+Census data is used to normalize both tests and COVID data for population
+
+```{r}
+census_api_key("2c8b9d5c4902b7efb4e1f98b2c23692cb1b73e95")
+
+v20 = load_variables(2018,"acs5")
+df_cencus=get_acs(geography = "tract",
+                  variables=c("pop"="B01001_001"),
+                  state="DC",geometry=TRUE,year=2018) 
+
+df_cens=df_cencus %>% select(-moe) %>% spread(variable,estimate) 
+df_cens_adj=df_cens %>% st_transform(4326)
+```
+
+### Join Census data to mapping data
+```{r}
+df_j=st_join(df_cens_adj,neigh3,largest=TRUE)
+```
+
+### Summarize population for each neighbourhood
+```{r}
+df3=df_j %>% select(pop,code) %>%
+  group_by(code) %>%
+  summarise(pop_n=sum(pop))
+            
+            
+```
+
+### Join population data and generate results
+
+Removed any extreme outliers and generated map to compare testing rates and covid rates
+
+```{r}
+df4=left_join(neigh3,df3 %>% st_set_geometry(NULL))
+
+df4=df4 %>% mutate( covid_rate=total_positives/pop_n, test_rate=total_tests/pop_n)
+df4 %>% filter(!(code %in% c("N0","N15","N24"))) %>% tm_shape()+tm_polygons(c("covid_rate","test_rate"))
+```
+
+
